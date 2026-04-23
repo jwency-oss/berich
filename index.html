@@ -1,97 +1,99 @@
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#F4EBE8;--surf:#EBE0DC;--card:#FAF5F2;
-  --maple:#B85550;--maple-d:#8A3530;--maple-l:#CC7A74;--maple-ll:#F0D8D5;--maple-lll:#FAF1EF;
-  --yellow:#C9A85C;--yellow-l:#EAD9A8;--yellow-ll:#FDF6E4;
-  --blue:#7A9CB2;--blue-l:#AECAD8;--blue-ll:#E4F0F5;
-  --purple:#9B8EB8;--purple-l:#C4B8D8;--purple-ll:#EDE9F5;
-  --red:#C47A7A;--red-l:#DFB0B0;--red-ll:#F7EAEA;
-  --text:#3A2E2C;--textm:#62504C;--textl:#9A9298;
-  --bdr:rgba(140,115,110,0.2);--r:13px;--rl:20px;--accent:var(--maple);
-}
-body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif}
-.pnum{font-family:Impact,'Arial Narrow','Arial Black',sans-serif !important}
-.tab{flex:1;padding:9px 0;background:none;border:none;border-bottom:2.5px solid transparent;font-size:13px;color:var(--textl);cursor:pointer;font-family:inherit;transition:all .2s}
-.tab.on{font-weight:500}
-.tab[data-c="y"].on{color:var(--yellow);border-bottom-color:var(--yellow)}
-.tab[data-c="b"].on{color:var(--blue);border-bottom-color:var(--blue)}
-.tab[data-c="p"].on{color:var(--purple);border-bottom-color:var(--purple)}
-.tab[data-c="r"].on{color:var(--red);border-bottom-color:var(--red)}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.sc{background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:11px 13px}
-.sl{font-size:11px;color:var(--textl);margin-bottom:3px}
-.sv{font-size:21px;font-weight:500}
-.sec{font-size:11px;color:var(--textl);letter-spacing:.5px;margin:12px 0 7px}
-.ei{display:flex;flex-direction:column;background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:10px 12px;margin-bottom:6px}
-.eirow{display:flex;align-items:center;gap:9px}
-.eico{width:35px;height:35px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.en{flex:1;min-width:0}
-.ename{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.emeta{font-size:11px;color:var(--textl);margin-top:2px}
-.db{background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:2px 5px;opacity:.5}
-.db:hover{opacity:1;color:var(--red)}
-.cc{border-radius:18px;padding:18px 20px;margin-bottom:10px;color:#fff;min-height:128px}
-.ab{width:100%;padding:10px;background:none;border:1px dashed var(--bdr);border-radius:var(--r);color:var(--textl);font-size:13px;cursor:pointer;font-family:inherit;margin-top:5px;transition:all .15s}
-.ab:hover{border-color:var(--accent);color:var(--accent)}
-.empty{text-align:center;padding:28px 0;color:var(--textl);font-size:13px;line-height:1.8}
-.fg{margin-bottom:12px}
-.fl{font-size:12px;color:var(--textl);display:block;margin-bottom:5px}
-.fi{width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--text);font-size:14px;font-family:inherit;outline:none;-webkit-appearance:none}
-.fi:focus{border-color:var(--accent)}
-.mtitle{font-size:16px;font-weight:500;color:var(--text);text-align:center;margin-bottom:16px}
-.mbtns{display:flex;gap:7px}
-.mb{flex:1;padding:8px 4px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--textm);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
-.mb.on{color:#fff;border-color:transparent}
-.sub{width:100%;padding:12px;color:#fff;border:none;border-radius:var(--r);font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:10px}
-.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;vertical-align:middle}
-.cdiv{height:.5px;background:var(--bdr);margin:4px 0 16px}
-.togbtn{border-radius:20px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:inherit;border:1px solid;transition:all .15s}
-</style>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Berich</title>
 
-<div id="W" style="height:660px;overflow:hidden;position:relative;max-width:420px;margin:0 auto;background:var(--bg)">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        /* 你的樣式表 */
+        *{box-sizing:border-box;margin:0;padding:0}
+        :root{
+          --bg:#F4EBE8;--surf:#EBE0DC;--card:#FAF5F2;
+          --maple:#B85550;--maple-d:#8A3530;--maple-l:#CC7A74;--maple-ll:#F0D8D5;--maple-lll:#FAF1EF;
+          --yellow:#C9A85C;--yellow-l:#EAD9A8;--yellow-ll:#FDF6E4;
+          --blue:#7A9CB2;--blue-l:#AECAD8;--blue-ll:#E4F0F5;
+          --purple:#9B8EB8;--purple-l:#C4B8D8;--purple-ll:#EDE9F5;
+          --red:#C47A7A;--red-l:#DFB0B0;--red-ll:#F7EAEA;
+          --text:#3A2E2C;--textm:#62504C;--textl:#9A9298;
+          --bdr:rgba(140,115,110,0.2);--r:13px;--rl:20px;--accent:var(--maple);
+        }
+        body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif}
+        .pnum{font-family:Impact,'Arial Narrow','Arial Black',sans-serif !important}
+        .tab{flex:1;padding:9px 0;background:none;border:none;border-bottom:2.5px solid transparent;font-size:13px;color:var(--textl);cursor:pointer;font-family:inherit;transition:all .2s}
+        .tab.on{font-weight:500}
+        .tab[data-c="y"].on{color:var(--yellow);border-bottom-color:var(--yellow)}
+        .tab[data-c="b"].on{color:var(--blue);border-bottom-color:var(--blue)}
+        .tab[data-c="p"].on{color:var(--purple);border-bottom-color:var(--purple)}
+        .tab[data-c="r"].on{color:var(--red);border-bottom-color:var(--red)}
+        .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        .sc{background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:11px 13px}
+        .sl{font-size:11px;color:var(--textl);margin-bottom:3px}
+        .sv{font-size:21px;font-weight:500}
+        .sec{font-size:11px;color:var(--textl);letter-spacing:.5px;margin:12px 0 7px}
+        .ei{display:flex;flex-direction:column;background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:10px 12px;margin-bottom:6px}
+        .eirow{display:flex;align-items:center;gap:9px}
+        .eico{width:35px;height:35px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+        .en{flex:1;min-width:0}
+        .ename{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .emeta{font-size:11px;color:var(--textl);margin-top:2px}
+        .db{background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:2px 5px;opacity:.5}
+        .db:hover{opacity:1;color:var(--red)}
+        .cc{border-radius:18px;padding:18px 20px;margin-bottom:10px;color:#fff;min-height:128px}
+        .ab{width:100%;padding:10px;background:none;border:1px dashed var(--bdr);border-radius:var(--r);color:var(--textl);font-size:13px;cursor:pointer;font-family:inherit;margin-top:5px;transition:all .15s}
+        .ab:hover{border-color:var(--accent);color:var(--accent)}
+        .empty{text-align:center;padding:28px 0;color:var(--textl);font-size:13px;line-height:1.8}
+        .fg{margin-bottom:12px}
+        .fl{font-size:12px;color:var(--textl);display:block;margin-bottom:5px}
+        .fi{width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--text);font-size:14px;font-family:inherit;outline:none;-webkit-appearance:none}
+        .fi:focus{border-color:var(--accent)}
+        .mtitle{font-size:16px;font-weight:500;color:var(--text);text-align:center;margin-bottom:16px}
+        .mbtns{display:flex;gap:7px}
+        .mb{flex:1;padding:8px 4px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--textm);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+        .mb.on{color:#fff;border-color:transparent}
+        .sub{width:100%;padding:12px;color:#fff;border:none;border-radius:var(--r);font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:10px}
+        .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;vertical-align:middle}
+        .cdiv{height:.5px;background:var(--bdr);margin:4px 0 16px}
+        .togbtn{border-radius:20px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:inherit;border:1px solid;transition:all .15s}
+    </style>
+</head>
+<body>
+
+<div id="W" style="height:100vh;overflow:hidden;position:relative;max-width:420px;margin:0 auto;background:var(--bg)">
   <div id="scroll" style="height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:84px">
 
-    <!-- ═══ GOURD HEADER ═══ -->
     <div style="display:flex;flex-direction:column;align-items:center;padding:18px 16px 6px;position:relative">
       <button onclick="showM('settings')" style="position:absolute;top:16px;right:16px;background:var(--maple-ll);border:1px solid var(--maple-l);color:var(--maple-d);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">⚙</button>
 
       <div style="display:flex;flex-direction:column;align-items:center">
-
-        <!-- ★ Big circle -->
         <div style="position:relative;width:162px;height:162px">
           <svg style="position:absolute;inset:0" viewBox="0 0 162 162" xmlns="http://www.w3.org/2000/svg">
-            <!-- White fill -->
             <circle cx="81" cy="81" r="78" fill="white" stroke="var(--maple-ll)" stroke-width="1.5"/>
-            <!-- Track ring -->
             <circle cx="81" cy="81" r="69" fill="none" stroke="#EDD0CC" stroke-width="9"/>
-            <!-- Progress ring (remaining budget) -->
             <circle id="prog-ring" cx="81" cy="81" r="69" fill="none" stroke="var(--maple)" stroke-width="9"
               stroke-dasharray="433" stroke-dashoffset="0" stroke-linecap="round"
               transform="rotate(-90 81 81)" style="transition:stroke-dashoffset .75s cubic-bezier(.4,0,.2,1)"/>
           </svg>
-          <!-- Text inside -->
           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
             <div style="font-size:10px;color:var(--maple);letter-spacing:1.8px;font-weight:700">今日剩餘</div>
             <div id="hamt" class="pnum" style="font-size:38px;color:var(--maple-d);letter-spacing:-2px;line-height:1">$1,000</div>
             <div id="hspent" style="font-size:10px;color:var(--maple-l);font-weight:500;letter-spacing:.3px">已花 $0</div>
           </div>
         </div>
-
-        <!-- ★ Neck -->
         <div style="width:10px;background:linear-gradient(var(--maple),var(--maple-l));height:18px;border-radius:0 0 5px 5px;margin-top:-1px;position:relative;z-index:1"></div>
-
-        <!-- ★ Small circle (private fund) -->
         <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(150deg,var(--maple-l),var(--maple));display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-1px;box-shadow:0 5px 16px rgba(184,85,80,.28)">
           <div style="font-size:9px;color:rgba(255,255,255,.85);letter-spacing:1px;font-weight:700;margin-bottom:1px">私房錢</div>
           <div id="fund-disp" class="pnum" style="font-size:18px;color:#fff;letter-spacing:-0.5px;line-height:1.1">$0</div>
         </div>
       </div>
-
       <div id="hsub" style="font-size:11px;color:var(--textl);text-align:center;margin-top:10px">每日限額 $1,000 · 今日已花 $0</div>
     </div>
 
-    <!-- TABS -->
     <div style="display:flex;padding:10px 16px 0;gap:4px">
       <button class="tab on" data-c="y" onclick="setTab('today',this,'y')">今日記帳</button>
       <button class="tab" data-c="b" onclick="setTab('cards',this,'b')">信用卡</button>
@@ -102,10 +104,8 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
     <div id="body" style="padding:14px 16px 0"></div>
   </div>
 
-  <!-- FAB -->
   <button id="fab" onclick="showM('add')" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--maple);color:#fff;width:52px;height:52px;border-radius:50%;border:none;font-size:26px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 16px rgba(184,85,80,.4)">+</button>
 
-  <!-- MODAL -->
   <div id="mo" onclick="closeOnBg(event)" style="display:none;position:absolute;inset:0;background:rgba(38,28,26,.3);z-index:20;align-items:flex-end">
     <div style="background:var(--card);border-radius:22px 22px 0 0;padding:14px 18px 32px;width:100%;max-height:90%;overflow-y:auto">
       <div style="width:34px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px"></div>
@@ -153,7 +153,6 @@ function render(){
   document.getElementById('hspent').textContent='已花 '+fmt(tot);
   document.getElementById('hsub').textContent='每日限額 '+fmt(S.budget)+' · 今日已花 '+fmt(tot);
   document.getElementById('fund-disp').textContent=fmt(S.fund.balance);
-  // r=69 → C=2π×69≈433
   const ring=document.getElementById('prog-ring');
   if(ring)ring.setAttribute('stroke-dashoffset',Math.round(433*(1-pct/100)));
   setAccent(curC);renderB();
@@ -366,3 +365,6 @@ function delFundTx(id,type,amount){
 }
 load();
 </script>
+
+</body>
+</html>
