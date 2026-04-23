@@ -13,24 +13,22 @@
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         :root{
+          /* 妳最愛的暖色調 */
           --bg:#F4EBE8;--surf:#EBE0DC;--card:#FAF5F2;
-          --maple:#B85550;--maple-d:#8A3530;--maple-l:#CC7A74;--maple-ll:#F0D8D5;--maple-lll:#FAF1EF;
+          --maple:#B85550;--maple-d:#8A3530;--maple-l:#CC7A74;--maple-ll:#F0D8D5;
           
-          /* 莫蘭迪色系設定 */
-          --m-green:#768A7E;   --m-green-l:#A5B5AC;   --m-green-ll:#DDE4E0; /* 復古綠 */
-          --m-blue:#5D6D7E;    --m-blue-l:#8C9BAA;    --m-blue-ll:#D6DCE2;  /* 深灰藍 */
-          --m-bean:#A3B18A;    --m-bean-l:#C7D1B5;    --m-bean-ll:#ECF0E6;  /* 灰豆綠 */
-          --m-purple:#9B8EB8;  --m-purple-l:#C4B8D8;  --m-purple-ll:#EDE9F5;/* 布洛克紫 */
+          /* 莫蘭迪選項色 */
+          --m-green:#768A7E; --m-blue:#5D6D7E; --m-bean:#A3B18A; --m-purple:#9B8EB8;
 
           --text:#3A2E2C;--textm:#62504C;--textl:#9A9298;
-          --bdr:rgba(140,115,110,0.2);--r:13px;--rl:20px;--accent:var(--m-green);
+          --bdr:rgba(140,115,110,0.2);--r:13px;
         }
-        body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif}
-        .pnum{font-family:Impact,'Arial Narrow','Arial Black',sans-serif !important}
+        body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang TC',sans-serif;overscroll-behavior:none}
+        .pnum{font-family:Impact,sans-serif !important}
         
-        /* 莫蘭迪選項顏色 */
-        .tab{flex:1;padding:9px 0;background:none;border:none;border-bottom:2.5px solid transparent;font-size:13px;color:var(--textl);cursor:pointer;font-family:inherit;transition:all .2s}
-        .tab.on{font-weight:500}
+        /* 選項標籤 */
+        .tab{flex:1;padding:10px 0;background:none;border:none;border-bottom:2.5px solid transparent;font-size:13px;color:var(--textl);cursor:pointer;transition:0.2s}
+        .tab.on{font-weight:600}
         .tab[data-c="y"].on{color:var(--m-green);border-bottom-color:var(--m-green)}
         .tab[data-c="b"].on{color:var(--m-blue);border-bottom-color:var(--m-blue)}
         .tab[data-c="p"].on{color:var(--m-bean);border-bottom-color:var(--m-bean)}
@@ -40,38 +38,26 @@
         .sc{background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:11px 13px}
         .sl{font-size:11px;color:var(--textl);margin-bottom:3px}
         .sv{font-size:21px;font-weight:500}
-        .sec{font-size:11px;color:var(--textl);letter-spacing:.5px;margin:12px 0 7px}
         
         .ei{display:flex;flex-direction:column;background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:10px 12px;margin-bottom:6px}
         .eirow{display:flex;align-items:center;gap:9px}
         .eico{width:35px;height:35px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
         .en{flex:1;min-width:0}
-        .ename{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .ename{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .emeta{font-size:11px;color:var(--textl);margin-top:2px}
-        .db{background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:2px 5px;opacity:.5}
-        .db:hover{opacity:1;color:var(--maple)}
+        .db{background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:5px}
         
-        .cc{border-radius:18px;padding:18px 20px;margin-bottom:10px;color:#fff;min-height:128px}
-        .ab{width:100%;padding:10px;background:none;border:1px dashed var(--bdr);border-radius:var(--r);color:var(--textl);font-size:13px;cursor:pointer;font-family:inherit;margin-top:5px;transition:all .15s}
-        .empty{text-align:center;padding:28px 0;color:var(--textl);font-size:13px;line-height:1.8}
-        .fg{margin-bottom:12px}
-        .fl{font-size:12px;color:var(--textl);display:block;margin-bottom:5px}
-        .fi{width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--text);font-size:14px;font-family:inherit;outline:none;-webkit-appearance:none}
-        .mtitle{font-size:16px;font-weight:500;color:var(--text);text-align:center;margin-bottom:16px}
-        .mbtns{display:flex;gap:7px}
-        .mb{flex:1;padding:8px 4px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--textm);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+        /* 彈窗與按鈕 */
+        .fi{width:100%;padding:10px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);color:var(--text);font-size:14px;outline:none;margin-bottom:10px}
+        .mb{flex:1;padding:8px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surf);font-size:13px;cursor:pointer}
         .mb.on{color:#fff;border-color:transparent}
-        .sub{width:100%;padding:12px;color:#fff;border:none;border-radius:var(--r);font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:10px}
-        .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;vertical-align:middle}
-        .cdiv{height:.5px;background:var(--bdr);margin:4px 0 16px}
-        .togbtn{border-radius:20px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:inherit;border:1px solid;transition:all .15s}
-
-        /* 分類標籤與圖表樣式 */
-        .cat-tag{padding:6px 10px;border-radius:15px;font-size:12px;background:var(--surf);border:1px solid var(--bdr);margin-right:6px;margin-bottom:8px;display:inline-block;cursor:pointer;color:var(--textm)}
+        .sub{width:100%;padding:12px;color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;margin-top:10px}
+        
+        /* 分類標籤 */
+        .cat-tag{padding:6px 12px;border-radius:15px;font-size:12px;background:var(--surf);border:1px solid var(--bdr);margin:0 6px 8px 0;display:inline-block;cursor:pointer}
         .cat-tag.on{background:var(--m-green);color:#fff;border-color:var(--m-green)}
-        .chart-bar{height:8px;background:var(--surf);border-radius:4px;display:flex;overflow:hidden;margin:10px 0 8px}
-        .c-seg{height:100%;}
-        .c-leg{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;color:var(--textl)}
+        .chart-bar{height:8px;background:var(--surf);border-radius:4px;display:flex;overflow:hidden;margin:10px 0}
+        .c-seg{height:100%}
     </style>
 </head>
 <body>
@@ -79,31 +65,30 @@
 <div id="W" style="height:100vh;overflow:hidden;position:relative;max-width:420px;margin:0 auto;background:var(--bg)">
   <div id="scroll" style="height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:84px">
 
-    <div style="display:flex;flex-direction:column;align-items:center;padding:18px 16px 6px;position:relative">
-      <button onclick="showM('settings')" style="position:absolute;top:16px;right:16px;background:var(--maple-ll);border:1px solid var(--maple-l);color:var(--maple-d);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">⚙</button>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:20px 16px 10px;position:relative">
+      <button onclick="showM('settings')" style="position:absolute;top:16px;right:16px;background:var(--maple-ll);border:none;width:30px;height:30px;border-radius:50%;color:var(--maple-d)">⚙</button>
 
       <div style="display:flex;flex-direction:column;align-items:center">
         <div style="position:relative;width:162px;height:162px">
-          <svg style="position:absolute;inset:0" viewBox="0 0 162 162" xmlns="http://www.w3.org/2000/svg">
+          <svg style="position:absolute;inset:0" viewBox="0 0 162 162">
             <circle cx="81" cy="81" r="78" fill="white" stroke="var(--maple-ll)" stroke-width="1.5"/>
             <circle cx="81" cy="81" r="69" fill="none" stroke="#EDD0CC" stroke-width="9"/>
             <circle id="prog-ring" cx="81" cy="81" r="69" fill="none" stroke="var(--maple)" stroke-width="9"
               stroke-dasharray="433" stroke-dashoffset="0" stroke-linecap="round"
-              transform="rotate(-90 81 81)" style="transition:stroke-dashoffset .75s cubic-bezier(.4,0,.2,1)"/>
+              transform="rotate(-90 81 81)" style="transition:0.6s"/>
           </svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
-            <div style="font-size:10px;color:var(--maple);letter-spacing:1.8px;font-weight:700">今日剩餘</div>
-            <div id="hamt" class="pnum" style="font-size:38px;color:var(--maple-d);letter-spacing:-2px;line-height:1">$1,000</div>
-            <div id="hspent" style="font-size:10px;color:var(--maple-l);font-weight:500;letter-spacing:.3px">已花 $0</div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:10px;color:var(--maple);font-weight:700;letter-spacing:1px">今日剩餘</div>
+            <div id="hamt" class="pnum" style="font-size:38px;color:var(--maple-d)">$0</div>
+            <div id="hspent" style="font-size:10px;color:var(--maple-l)">已花 $0</div>
           </div>
         </div>
-        <div style="width:10px;background:linear-gradient(var(--maple),var(--maple-l));height:18px;border-radius:0 0 5px 5px;margin-top:-1px;position:relative;z-index:1"></div>
-        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(150deg,var(--maple-l),var(--maple));display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-1px;box-shadow:0 5px 16px rgba(184,85,80,.28)">
-          <div style="font-size:9px;color:rgba(255,255,255,.85);letter-spacing:1px;font-weight:700;margin-bottom:1px">私房錢</div>
-          <div id="fund-disp" class="pnum" style="font-size:18px;color:#fff;letter-spacing:-0.5px;line-height:1.1">$0</div>
+        <div style="width:10px;background:linear-gradient(var(--maple),var(--maple-l));height:18px;border-radius:0 0 5px 5px;margin-top:-1px"></div>
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(150deg,var(--m-purple),#7A70A8);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-1px;box-shadow:0 4px 12px rgba(155,142,184,.4)">
+          <div style="font-size:9px;color:rgba(255,255,255,.9)">私房錢</div>
+          <div id="fund-disp" class="pnum" style="font-size:18px;color:#fff">$0</div>
         </div>
       </div>
-      <div id="hsub" style="font-size:11px;color:var(--textl);text-align:center;margin-top:10px">每日限額 $1,000 · 今日已花 $0</div>
     </div>
 
     <div style="display:flex;padding:10px 16px 0;gap:4px">
@@ -116,332 +101,171 @@
     <div id="body" style="padding:14px 16px 0"></div>
   </div>
 
-  <button id="fab" onclick="showM('add')" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--m-green);color:#fff;width:52px;height:52px;border-radius:50%;border:none;font-size:26px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 16px rgba(118,138,126,.4)">+</button>
+  <button id="fab" onclick="showM('add')" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--m-green);color:#fff;width:56px;height:56px;border-radius:50%;border:none;font-size:28px;box-shadow:0 4px 15px rgba(0,0,0,0.15)">+</button>
 
-  <div id="mo" onclick="closeOnBg(event)" style="display:none;position:absolute;inset:0;background:rgba(38,28,26,.3);z-index:20;align-items:flex-end">
-    <div style="background:var(--card);border-radius:22px 22px 0 0;padding:14px 18px 32px;width:100%;max-height:90%;overflow-y:auto">
-      <div style="width:34px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px"></div>
+  <div id="mo" onclick="closeOnBg(event)" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.3);z-index:100;align-items:flex-end">
+    <div style="background:var(--card);border-radius:22px 22px 0 0;padding:20px;width:100%;max-height:85%;overflow-y:auto">
       <div id="mc"></div>
     </div>
   </div>
 </div>
 
 <script>
-// 初始化資料結構，加入 incomes 與 categories
-const S={budget:1000,expenses:[],incomes:[],categories:['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'],cards:[],petty:{budget:5000,items:[]},fund:{balance:0,txs:[]}};
-const AF={type:'exp',method:'現金',cat:'飲食',cardId:null,inst:false,periods:12,_a:'',_d:''};
-let tab='today',curC='y';
+// 強大且穩定的儲存機制
+let S = {
+    budget: 1000,
+    expenses: [],
+    incomes: [],
+    categories: ['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'],
+    fund: {balance:0}
+};
 
-// 顏色設定：y=綠, b=藍, p=豆綠, r=紫
-const FABCOL={y:'#768A7E',b:'#5D6D7E',p:'#A3B18A',r:'#9B8EB8'};
-const CAT_COLORS = ['#768A7E', '#5D6D7E', '#A3B18A', '#9B8EB8', '#B85550', '#C9A85C', '#7A9CB2', '#D4A373', '#CCD5AE'];
-const CC_BG=['linear-gradient(140deg,#5D6D7E,#3A4A5A)','linear-gradient(140deg,#A3B18A,#7A8C62)','linear-gradient(140deg,#9B8EB8,#7A70A8)','linear-gradient(140deg,#768A7E,#506558)'];
+const FABCOL = {y:'#768A7E', b:'#5D6D7E', p:'#A3B18A', r:'#9B8EB8'};
+const CAT_COLORS = ['#768A7E', '#5D6D7E', '#A3B18A', '#9B8EB8', '#B85550', '#C9A85C', '#7A9CB2'];
+let tab = 'today', curC = 'y', AF = {type:'exp', cat:'飲食'};
 
-async function load(){
-  const keys = ['budget','expenses','incomes','categories','cards','petty','fund'];
-  for(const k of keys){
-    try{const r=await window.storage.get(k);if(r){const v=JSON.parse(r.value);if(k==='budget')S.budget=v;else S[k]=v;}}catch(e){}
-  }
-  // 如果沒有預設分類，補上
-  if(!S.categories || S.categories.length===0) S.categories = ['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'];
-  if(!S.incomes) S.incomes = [];
-  render();
+// 讀取資料
+function load(){
+    const saved = localStorage.getItem('Berich_Data_Final');
+    if(saved) {
+        const parsed = JSON.parse(saved);
+        // 確保新功能欄位存在
+        if(parsed.incomes) S.incomes = parsed.incomes;
+        if(parsed.expenses) S.expenses = parsed.expenses;
+        if(parsed.budget) S.budget = parsed.budget;
+        if(parsed.fund) S.fund = parsed.fund;
+        if(parsed.categories) S.categories = parsed.categories;
+    }
+    render();
 }
-async function save(){
-  const keys = ['budget','expenses','incomes','categories','cards','petty','fund'];
-  for(const k of keys){
-    try{await window.storage.set(k,JSON.stringify(k==='budget'?S.budget:S[k]));}catch(e){}
-  }
-}
 
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function fmt(n){return'$'+Math.round(n).toLocaleString('zh-TW')}
-function todaysE(){return S.expenses.filter(e=>new Date(e.date).toDateString()===new Date().toDateString())}
-function todaysI(){return S.incomes.filter(i=>new Date(i.date).toDateString()===new Date().toDateString())}
-function curPer(d,t){return Math.min(t,Math.max(1,Math.floor((Date.now()-d)/(1000*60*60*24*30))+1))}
-
-function setAccent(c){
-  curC=c;
-  const fab=document.getElementById('fab');
-  fab.style.background=FABCOL[c];fab.style.boxShadow='0 3px 14px '+FABCOL[c]+'66';
-  const m={y:['--m-green','--m-green-l','--m-green-ll'],b:['--m-blue','--m-blue-l','--m-blue-ll'],p:['--m-bean','--m-bean-l','--m-bean-ll'],r:['--m-purple','--m-purple-l','--m-purple-ll']};
-  const rt=document.documentElement;
-  rt.style.setProperty('--accent','var('+m[c][0]+')');rt.style.setProperty('--accent-l','var('+m[c][1]+')');rt.style.setProperty('--accent-ll','var('+m[c][2]+')');
+// 儲存資料
+function save(){
+    localStorage.setItem('Berich_Data_Final', JSON.stringify(S));
 }
 
 function render(){
-  const totE=todaysE().reduce((s,e)=>s+e.amount,0);
-  const totI=todaysI().reduce((s,e)=>s+e.amount,0);
-  const rem=S.budget-totE+totI,pct=Math.max(0,Math.min(100,rem/S.budget*100));
-  
-  document.getElementById('hamt').textContent=fmt(Math.max(0,rem));
-  document.getElementById('hspent').textContent='已花 '+fmt(totE)+(totI>0?' · 收入 '+fmt(totI):'');
-  document.getElementById('hsub').textContent='每日限額 '+fmt(S.budget)+' · 今日已花 '+fmt(totE);
-  document.getElementById('fund-disp').textContent=fmt(S.fund.balance);
-  const ring=document.getElementById('prog-ring');
-  if(ring)ring.setAttribute('stroke-dashoffset',Math.round(433*(1-pct/100)));
-  setAccent(curC);renderB();
-}
-function renderB(){
-  const el=document.getElementById('body');
-  if(tab==='today')el.innerHTML=rToday();
-  else if(tab==='cards')el.innerHTML=rCards();
-  else if(tab==='petty')el.innerHTML=rPetty();
-  else el.innerHTML=rFund();
-}
-function setTab(t,btn,c){tab=t;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');setAccent(c);renderB();}
-
-function rToday(){
-  const exps=[...todaysE()].map(e=>({...e, isInc:false}));
-  const incs=[...todaysI()].map(i=>({...i, isInc:true}));
-  const all=[...exps, ...incs].sort((a,b)=>b.date-a.date);
-  
-  const cashT=exps.filter(e=>e.method==='現金').reduce((s,e)=>s+e.amount,0);
-  const cardT=exps.filter(e=>e.method==='刷卡').reduce((s,e)=>s+e.amount,0);
-  const compT=exps.filter(e=>e.method==='公司').reduce((s,e)=>s+e.amount,0);
-  const incT=incs.reduce((s,e)=>s+e.amount,0);
-
-  // 圖表計算
-  let cBars='', cLeg='';
-  if(exps.length>0){
-    const cTotals={}; exps.forEach(e=>cTotals[e.cat]=(cTotals[e.cat]||0)+e.amount);
-    const totAll=exps.reduce((a,b)=>a+b.amount,0);
-    Object.keys(cTotals).forEach((cat,i)=>{
-      const p=(cTotals[cat]/totAll*100).toFixed(0);
-      const col=CAT_COLORS[i%CAT_COLORS.length];
-      cBars+=`<div class="c-seg" style="width:${p}%;background:${col}"></div>`;
-      cLeg+=`<span><i style="width:6px;height:6px;border-radius:50%;display:inline-block;background:${col};margin-right:3px"></i>${cat} ${p}%</span>`;
-    });
-  } else { cBars=`<div style="font-size:11px;color:var(--textl);padding:4px 0">尚無支出資料</div>`; }
-
-  return`<div class="row2">
-    <div class="sc" style="border-left:3px solid var(--m-green)"><div class="sl">今日支出</div><div class="sv" style="color:var(--m-green)">${fmt(exps.reduce((s,e)=>s+e.amount,0))}</div></div>
-    <div class="sc" style="border-left:3px solid var(--textl)"><div class="sl">今日收入</div><div class="sv">${fmt(incT)}</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px">
-    <div style="background:var(--card);border-radius:var(--r);padding:9px 10px;border:.5px solid var(--bdr)"><div style="font-size:10px;color:var(--textl);margin-bottom:2px">💵 現金</div><div style="font-size:14px;font-weight:500;color:var(--text)">${fmt(cashT)}</div></div>
-    <div style="background:var(--card);border-radius:var(--r);padding:9px 10px;border:.5px solid var(--bdr)"><div style="font-size:10px;color:var(--textl);margin-bottom:2px">💳 刷卡</div><div style="font-size:14px;font-weight:500;color:var(--text)">${fmt(cardT)}</div></div>
-    <div style="background:var(--card);border-radius:var(--r);padding:9px 10px;border:.5px solid var(--bdr)"><div style="font-size:10px;color:var(--textl);margin-bottom:2px">🏢 公司</div><div style="font-size:14px;font-weight:500;color:var(--text)">${fmt(compT)}</div></div>
-  </div>
-  
-  <div style="background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:10px 12px;margin-bottom:16px">
-    <div class="sl">支出類別占比</div>
-    <div class="chart-bar">${exps.length>0?cBars:''}</div>
-    <div class="c-leg">${cLeg}</div>
-  </div>
-
-  <div class="sec">今日明細</div>
-  ${all.length===0?'<div class="empty">今天還沒有紀錄<br>點下方 ＋ 開始記帳</div>':
-    all.map(e=>{
-      const isI=e.isInc;
-      const col=isI?'var(--m-green)':(e.method==='現金'?'var(--textm)':e.method==='刷卡'?'var(--m-blue)':'var(--m-purple)');
-      const bg='var(--surf)';
-      const ico=isI?'💰':(e.method==='現金'?'💵':e.method==='刷卡'?'💳':'🏢');
-      const t=new Date(e.date).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-      const parts=[];
-      if(!isI && e.cardId){const card=S.cards.find(c=>c.id===e.cardId); if(card) parts.push(`<span class="tag" style="background:var(--m-blue-ll);color:var(--m-blue)">${card.name}</span>`);}
-      if(!isI && e.installment?.enabled)parts.push(`<span class="tag" style="background:var(--m-purple-ll);color:var(--m-purple)">${curPer(e.date,e.installment.periods)}/${e.installment.periods}期</span>`);
-      
-      return`<div class="ei"><div class="eirow">
-        <div class="eico" style="background:${bg}">${ico}</div>
-        <div class="en">
-          <div class="ename">${e.desc||e.cat||(isI?'收入':'消費')}</div>
-          <div class="emeta">${parts.length?parts.join(' ')+'<span style="color:var(--textl)"> · </span>':''}<span style="color:${col};font-weight:500">${e.cat||e.method}</span> · ${t}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:15px;font-weight:500;color:${isI?'var(--m-green)':'var(--maple)'}">${isI?'+':'-'}${fmt(e.amount)}</div>
-          <button class="db" onclick="delItem('${e.id}', ${isI})">✕</button>
-        </div>
-      </div></div>`;
-    }).join('')}`;
-}
-
-function rCards(){
-  let html='';
-  if(!S.cards.length)html='<div class="empty">還沒有信用卡<br>點下方新增</div>';
-  else S.cards.forEach((card,i)=>{
-    const exps=S.expenses.filter(e=>e.cardId===card.id).reverse();
-    const total=exps.reduce((s,e)=>s+e.amount,0);
-    const instMo=exps.reduce((s,e)=>{if(e.installment?.enabled){const cp=curPer(e.date,e.installment.periods);return cp<e.installment.periods?s+e.installment.monthlyAmount:s;}return s;},0);
-    html+=`<div class="cc" style="background:${CC_BG[i%CC_BG.length]}">
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div><div style="font-size:15px;font-weight:500;margin-bottom:3px">${card.name}</div><div style="font-size:12px;opacity:.72;letter-spacing:2px;margin-bottom:14px">**** ${card.last4}</div></div>
-        <button onclick="delCard('${card.id}')" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:11px">✕</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div><div style="font-size:10px;opacity:.62;margin-bottom:2px">消費截止</div><div style="font-size:12px;font-weight:500">每月 ${card.billingCycle} 日</div></div>
-        <div><div style="font-size:10px;opacity:.62;margin-bottom:2px">結帳日</div><div style="font-size:12px;font-weight:500">每月 ${card.statementDate} 日</div></div>
-        <div><div style="font-size:10px;opacity:.62;margin-bottom:2px">繳費日</div><div style="font-size:12px;font-weight:500">每月 ${card.dueDate} 日</div></div>
-      </div>
-    </div>`;
-    if(exps.length){
-      html+=`<div class="row2"><div class="sc" style="border-top:2.5px solid var(--m-blue)"><div class="sl">累計消費</div><div class="sv" style="color:var(--m-blue)">${fmt(total)}</div></div><div class="sc" style="border-top:2.5px solid var(--m-purple)"><div class="sl">分期每月合計</div><div class="sv" style="color:var(--m-purple)">${instMo>0?fmt(instMo):'—'}</div></div></div>`;
-      exps.forEach(e=>{
-        const d=new Date(e.date).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'});
-        let ib='';
-        if(e.installment?.enabled){const cp=curPer(e.date,e.installment.periods),done=cp>=e.installment.periods,pct2=Math.min(100,Math.round(cp/e.installment.periods*100));
-          ib=`<div style="margin-top:8px;padding-top:8px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span class="tag" style="background:${done?'var(--surf)':'var(--m-blue-ll)'};color:${done?'var(--textl)':'var(--m-blue)'}">${done?'✓ 已付清':'第 '+cp+' / '+e.installment.periods+' 期'}</span><span style="font-size:11px;color:var(--textl)">每期 ${fmt(e.installment.monthlyAmount)}</span></div><div style="background:var(--surf);height:5px;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;background:${done?'var(--textl)':'var(--m-blue)'};width:${pct2}%"></div></div></div>`;
-        }
-        html+=`<div class="ei"><div class="eirow"><div class="eico" style="background:var(--surf)">💳</div><div class="en"><div class="ename">${e.desc||e.cat||'刷卡消費'}</div><div class="emeta">${d}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:500;color:var(--m-blue)">-${fmt(e.amount)}</div><button class="db" onclick="delItem('${e.id}', false)">✕</button></div></div>${ib}</div>`;
-      });
-    } else html+=`<div style="font-size:13px;color:var(--textl);text-align:center;padding:10px 0 12px">還沒有消費紀錄</div>`;
-    if(i<S.cards.length-1)html+=`<div class="cdiv"></div>`;
-  });
-  html+=`<button class="ab" onclick="showM('addCard')">＋ 新增信用卡</button>`;
-  return html;
-}
-
-function rPetty(){
-  const tot=S.petty.items.reduce((s,e)=>s+e.amount,0),rem=S.petty.budget-tot;
-  const pct=Math.max(0,Math.min(100,tot/S.petty.budget*100));
-  return`<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--m-bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">零用金餘額</div><div class="sv" style="color:var(--m-bean)">${fmt(rem)}</div></div><div style="text-align:right"><div class="sl">已使用</div><div class="sv" style="color:var(--maple)">${fmt(tot)}</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--m-bean);width:${pct}%"></div></div></div>
-  <div style="display:flex;gap:7px;margin-bottom:12px"><button class="ab" style="margin:0;flex:1" onclick="showM('addPetty')">＋ 新增花費</button><button class="ab" style="margin:0;flex:1" onclick="showM('setPetty')">設定額度</button></div>
-  <div class="sec">零用金明細</div>
-  ${!S.petty.items.length?'<div class="empty">還沒有零用金記錄</div>':
-    [...S.petty.items].reverse().map(e=>{const d=new Date(e.date).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'});
-      return`<div class="ei"><div class="eirow"><div class="eico" style="background:var(--surf)">🏢</div><div class="en"><div class="ename">${e.desc||'零用金花費'}</div><div class="emeta">${d}</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:500;color:var(--m-bean)">-${fmt(e.amount)}</div><button class="db" onclick="delPetty('${e.id}')">✕</button></div></div></div>`;
-    }).join('')}`;
-}
-
-function rFund(){
-  return`<div style="background:linear-gradient(145deg,var(--m-purple-l),var(--m-purple));border-radius:18px;padding:22px;color:#fff;text-align:center;margin-bottom:12px"><div style="font-size:12px;opacity:.75;margin-bottom:5px">私房錢餘額</div><div class="pnum" style="font-size:40px;color:#fff;letter-spacing:-1.5px;line-height:1.1">${fmt(S.fund.balance)}</div></div>
-  <div style="display:flex;gap:7px;margin-bottom:12px"><button class="ab" style="margin:0;flex:1" onclick="showM('fundIn')">＋ 存入</button><button class="ab" style="margin:0;flex:1" onclick="showM('fundOut')">－ 取出</button></div>
-  <div class="sec">交易紀錄</div>
-  ${!S.fund.txs.length?'<div class="empty">還沒有交易紀錄</div>':
-    [...S.fund.txs].reverse().map(tx=>{const d=new Date(tx.date).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'}),isIn=tx.type==='in';
-      return`<div class="ei"><div class="eirow"><div class="eico" style="background:var(--surf)">${isIn?'💰':'💸'}</div><div class="en"><div class="ename">${tx.desc||(isIn?'存入':'取出')}</div><div class="emeta">${d}</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:500;color:${isIn?'var(--m-purple)':'var(--maple)'};">${isIn?'+':'-'}${fmt(tx.amount)}</div><button class="db" onclick="delFundTx('${tx.id}','${tx.type}',${tx.amount})">✕</button></div></div></div>`;
-    }).join('')}`;
-}
-
-function updateInstPreview(){
-  const a=document.getElementById('mamt'),p=document.getElementById('mperd'),pv=document.getElementById('inst-preview');
-  if(!p||!pv)return;
-  const per=parseInt(p.value)||0;AF.periods=per;
-  document.querySelectorAll('.qper').forEach(b=>{const on=parseInt(b.dataset.p)===per;b.classList.toggle('on',on);b.style.background=on?'var(--m-blue)':'';b.style.color=on?'#fff':'';b.style.borderColor=on?'transparent':'';});
-  const amt=parseFloat(a?.value)||0;
-  if(amt>0&&per>0){const mo=Math.ceil(amt/per);pv.style.display='block';pv.innerHTML='每期約 <span style="color:var(--m-blue);font-weight:500">'+fmt(mo)+'</span> · 共 '+per+' 期 · 總計 '+fmt(mo*per);}
-  else pv.style.display='none';
-}
-function setQuickPer(p){AF.periods=p;const el=document.getElementById('mperd');if(el)el.value=p;updateInstPreview();}
-
-function renderAddModal(){
-  const a=document.getElementById('mamt'),d=document.getElementById('mdesc');
-  if(a)AF._a=a.value;if(d)AF._d=d.value;
-  const mc=document.getElementById('mc'),acc=FABCOL[curC];
-
-  let html=`<div style="display:flex;background:var(--surf);border-radius:var(--r);padding:4px;margin-bottom:16px">
-    <button style="flex:1;padding:8px;border:none;border-radius:10px;background:${AF.type==='exp'?'var(--card)':'transparent'};color:${AF.type==='exp'?'var(--text)':'var(--textl)'};font-weight:${AF.type==='exp'?'600':'400'};font-size:14px;cursor:pointer" onclick="AF.type='exp';renderAddModal()">支出</button>
-    <button style="flex:1;padding:8px;border:none;border-radius:10px;background:${AF.type==='inc'?'var(--card)':'transparent'};color:${AF.type==='inc'?'var(--m-green)':'var(--textl)'};font-weight:${AF.type==='inc'?'600':'400'};font-size:14px;cursor:pointer" onclick="AF.type='inc';renderAddModal()">收入</button>
-  </div>
-    <div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="${AF._a}" oninput="updateInstPreview()"></div>
-    <div class="fg"><label class="fl">描述（可略）</label><input class="fi" id="mdesc" placeholder="午餐、薪水、飲料..." value="${AF._d}"></div>
+    const today = new Date().toDateString();
+    const tExp = S.expenses.filter(e => new Date(e.date).toDateString() === today).reduce((a,b)=>a+b.amount,0);
+    const tInc = S.incomes.filter(i => new Date(i.date).toDateString() === today).reduce((a,b)=>a+b.amount,0);
+    const rem = S.budget - tExp + tInc;
     
-    <div class="fg"><label class="fl">分類</label>
-      <div style="margin-bottom:10px">
-        ${S.categories.map(c=>{const on=AF.cat===c;return`<span class="cat-tag ${on?'on':''}" onclick="AF.cat='${c}';renderAddModal()">${c}</span>`}).join('')}
-      </div>
-    </div>`;
+    document.getElementById('hamt').textContent = '$' + Math.max(0, rem).toLocaleString();
+    document.getElementById('hspent').textContent = '已花 $' + tExp.toLocaleString();
+    document.getElementById('fund-disp').textContent = '$' + S.fund.balance.toLocaleString();
+    
+    const ring = document.getElementById('prog-ring');
+    if(ring) ring.setAttribute('stroke-dashoffset', Math.round(433 * (1 - Math.max(0, rem/S.budget))));
+    
+    renderBody(tExp, tInc);
+}
 
-  if(AF.type==='exp'){
-    html+=`<div class="fg"><label class="fl">付款方式</label><div class="mbtns">
-      ${['現金','刷卡','公司'].map(m=>{const on=AF.method===m;return`<button class="mb${on?' on':''}" style="${on?'background:var(--textm);color:#fff;border-color:transparent':''}" onclick="AF.method='${m}';renderAddModal()">${m}</button>`;}).join('')}
-    </div></div>`;
+function renderBody(tExp, tInc){
+    const el = document.getElementById('body');
+    if(tab === 'today'){
+        el.innerHTML = `
+            <div class="row2">
+                <div class="sc" style="border-left:3px solid var(--maple)"><div class="sl">今日支出</div><div class="sv" style="color:var(--maple)">$${tExp.toLocaleString()}</div></div>
+                <div class="sc" style="border-left:3px solid var(--m-green)"><div class="sl">今日收入</div><div class="sv" style="color:var(--m-green)">$${tInc.toLocaleString()}</div></div>
+            </div>
+            <div style="background:var(--card);border:.5px solid var(--bdr);border-radius:var(--r);padding:10px 12px;margin-bottom:15px">
+                <div class="sl">支出類別占比</div>
+                ${renderChart()}
+            </div>
+            <div class="sec">今日明細</div>
+            ${renderList()}
+        `;
+    } else { el.innerHTML = `<div style="text-align:center;color:var(--textl);padding:40px">此功能分頁同步優化中</div>`; }
+}
 
-    if(AF.method==='刷卡'){
-      html+=`<div class="fg"><label class="fl" style="color:var(--m-blue)">選擇信用卡</label>`;
-      if(!S.cards.length)html+=`<div style="font-size:12px;color:var(--textl);padding:8px 10px;background:var(--surf);border-radius:var(--r);text-align:center">請先在信用卡頁籤新增卡片</div>`;
-      else{html+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;S.cards.forEach(c=>{const on=AF.cardId===c.id;html+=`<button class="mb${on?' on':''}" style="${on?'background:var(--m-blue);color:#fff;border-color:transparent':''};flex:none;padding:8px 14px;font-size:12px" onclick="AF.cardId='${c.id}';renderAddModal()">${c.name}</button>`;});html+=`</div>`;}
-      html+=`</div>`;
-      html+=`<div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${AF.inst?'11':'0'}px"><label class="fl" style="margin:0">分期付款</label><button class="togbtn" onclick="AF.inst=!AF.inst;renderAddModal()" style="background:${AF.inst?'var(--m-blue)':'transparent'};border-color:${AF.inst?'var(--m-blue)':'var(--bdr)'};color:${AF.inst?'#fff':'var(--textl)'}">${AF.inst?'✓ 已開啟':'關閉'}</button></div>`;
-      if(AF.inst){
-        html+=`<div style="display:flex;gap:6px;margin-bottom:8px">${[3,6,12,24].map(p=>{const on=AF.periods===p;return`<button class="mb qper${on?' on':''}" data-p="${p}" style="${on?'background:var(--m-blue);color:#fff;border-color:transparent':''};padding:7px 2px;font-size:12px" onclick="setQuickPer(${p})">${p}期</button>`;}).join('')}</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:12px;color:var(--textl);white-space:nowrap;flex-shrink:0">自訂期數</div><input class="fi" id="mperd" type="number" min="1" max="999" placeholder="期數" value="${AF.periods}" style="padding:8px 10px;font-size:14px;text-align:center" oninput="updateInstPreview()"><div style="font-size:13px;color:var(--textl);white-space:nowrap">期</div></div>
-        <div id="inst-preview" style="font-size:12px;color:var(--textl);text-align:center;background:var(--surf);padding:8px 12px;border-radius:var(--r);${AF.inst?'':'display:none'}"></div>`;
-      }
-      html+=`</div>`;
-    }
-  }
-  html+=`<button class="sub" style="background:${AF.type==='inc'?'var(--m-green)':acc}" onclick="subAdd()">完成記帳</button>`;
-  mc.innerHTML=html;
+function renderChart(){
+    const today = new Date().toDateString();
+    const exps = S.expenses.filter(e => new Date(e.date).toDateString() === today);
+    if(!exps.length) return `<div style="font-size:12px;color:var(--textl)">尚無支出</div>`;
+    const totals = {}; exps.forEach(e => totals[e.cat] = (totals[e.cat]||0) + e.amount);
+    const sum = exps.reduce((a,b)=>a+b.amount,0);
+    let bars = '', legs = '';
+    Object.keys(totals).forEach((c, i) => {
+        const p = (totals[c]/sum*100).toFixed(0);
+        const col = CAT_COLORS[i%CAT_COLORS.length];
+        bars += `<div class="c-seg" style="width:${p}%;background:${col}"></div>`;
+        legs += `<span style="font-size:10px;margin-right:8px"><i style="width:6px;height:6px;background:${col};display:inline-block;border-radius:50%"></i> ${c} ${p}%</span>`;
+    });
+    return `<div class="chart-bar">${bars}</div><div style="display:flex;flex-wrap:wrap">${legs}</div>`;
+}
+
+function renderList(){
+    const today = new Date().toDateString();
+    const all = [
+        ...S.expenses.filter(e => new Date(e.date).toDateString() === today).map(e => ({...e, type:'exp'})),
+        ...S.incomes.filter(i => new Date(i.date).toDateString() === today).map(i => ({...i, type:'inc'}))
+    ].sort((a,b)=>b.date - a.date);
+    if(!all.length) return `<div style="text-align:center;padding:20px;color:var(--textl)">還沒有紀錄喔</div>`;
+    return all.map(e => `
+        <div class="ei"><div class="eirow">
+            <div class="eico" style="background:var(--surf)">${e.type==='exp'?'💸':'💰'}</div>
+            <div class="en"><div class="ename">${e.desc||e.cat}</div><div class="emeta">${e.cat}</div></div>
+            <div style="text-align:right">
+                <div style="font-size:15px;font-weight:600;color:${e.type==='exp'?'var(--maple)':'var(--m-green)'}">
+                    ${e.type==='exp'?'-':'+'}$${e.amount.toLocaleString()}
+                </div>
+                <button class="db" onclick="delItem('${e.id}','${e.type}')">✕</button>
+            </div>
+        </div></div>`).join('');
 }
 
 function showM(type){
-  const mc=document.getElementById('mc');
-  if(type==='add'){AF.type='exp';AF.method='現金';if(!AF.cat)AF.cat=S.categories[0];AF.cardId=null;AF.inst=false;AF.periods=12;AF._a='';AF._d='';renderAddModal();}
-  else if(type==='settings')mc.innerHTML=`<div class="mtitle">設定</div><div class="fg"><label class="fl">每日花費上限（元）</label><input class="fi" id="mbudget" type="number" value="${S.budget}" inputmode="decimal"></div><div class="fg"><label class="fl">新增自訂分類</label><div style="display:flex;gap:8px"><input class="fi" id="mnewcat" placeholder="例如：進修、遊戲..." style="margin-bottom:0"><button class="sub" style="margin:0;width:auto;padding:0 20px;background:var(--textm)" onclick="addNewCat()">加入</button></div></div><button class="sub" style="background:var(--m-green);margin-top:20px" onclick="subBudget()">儲存設定</button>`;
-  else if(type==='addCard')mc.innerHTML=`<div class="mtitle">新增信用卡</div><div class="fg"><label class="fl">卡片名稱</label><input class="fi" id="mcn" placeholder="台新玫瑰卡、國泰世華..."></div><div class="fg"><label class="fl">卡號後四碼</label><input class="fi" id="mcl4" placeholder="1234" maxlength="4" inputmode="numeric"></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px"><div><label class="fl">消費截止日</label><input class="fi" id="mcb" type="number" min="1" max="31" placeholder="25" inputmode="numeric"></div><div><label class="fl">結帳日</label><input class="fi" id="mcs" type="number" min="1" max="31" placeholder="5" inputmode="numeric"></div><div><label class="fl">繳費日</label><input class="fi" id="mcd" type="number" min="1" max="31" placeholder="25" inputmode="numeric"></div></div><button class="sub" style="background:var(--m-blue)" onclick="subCard()">新增</button>`;
-  else if(type==='addPetty')mc.innerHTML=`<div class="mtitle">新增零用金花費</div><div class="fg"><label class="fl">金額</label><input class="fi" id="mpa" type="number" placeholder="0" inputmode="decimal"></div><div class="fg"><label class="fl">描述（可略）</label><input class="fi" id="mpd" placeholder="描述..."></div><button class="sub" style="background:var(--m-bean)" onclick="subPetty()">記帳</button>`;
-  else if(type==='setPetty')mc.innerHTML=`<div class="mtitle">設定零用金額度</div><div class="fg"><label class="fl">零用金總額（元）</label><input class="fi" id="mpb" type="number" value="${S.petty.budget}" inputmode="decimal"></div><button class="sub" style="background:var(--m-bean)" onclick="subPettyB()">儲存</button>`;
-  else if(type==='fundIn')mc.innerHTML=`<div class="mtitle">存入私房錢</div><div class="fg"><label class="fl">金額</label><input class="fi" id="mfa" type="number" placeholder="0" inputmode="decimal"></div><div class="fg"><label class="fl">備註（可略）</label><input class="fi" id="mfd" placeholder="..."></div><button class="sub" style="background:var(--m-purple)" onclick="subFund('in')">存入</button>`;
-  else if(type==='fundOut')mc.innerHTML=`<div class="mtitle">取出私房錢</div><div class="fg"><label class="fl">金額</label><input class="fi" id="mfa" type="number" placeholder="0" inputmode="decimal"></div><div class="fg"><label class="fl">備註（可略）</label><input class="fi" id="mfd" placeholder="..."></div><button class="sub" style="background:var(--maple)" onclick="subFund('out')">取出</button>`;
-  document.getElementById('mo').style.display='flex';
-}
-function closeM(){document.getElementById('mo').style.display='none';}
-function closeOnBg(e){if(e.target===document.getElementById('mo'))closeM();}
-
-function addNewCat(){
-  const v=document.getElementById('mnewcat').value.trim();
-  if(v && !S.categories.includes(v)){ S.categories.push(v); document.getElementById('mnewcat').value=''; save(); }
-}
-function subAdd(){
-  const amt=parseFloat(document.getElementById('mamt').value);if(!amt||amt<=0)return;
-  const desc=document.getElementById('mdesc').value;
-  const item={id:uid(),date:Date.now(),amount:amt,desc,cat:AF.cat};
-  if(AF.type==='exp'){
-    item.method=AF.method;
-    if(AF.method==='刷卡'){
-      if(AF.cardId)item.cardId=AF.cardId;
-      if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;item.installment={enabled:true,periods:p,monthlyAmount:Math.ceil(amt/p)};}
+    const mc = document.getElementById('mc');
+    if(type === 'add'){
+        AF.type='exp';
+        renderAddModal();
+    } else if(type === 'settings') {
+        mc.innerHTML = `
+            <div class="mtitle">每日限額設定</div>
+            <input type="number" id="nbud" class="fi" value="${S.budget}">
+            <button class="sub" style="background:var(--m-green)" onclick="S.budget=parseFloat(document.getElementById('nbud').value);save();closeM();render();">儲存設定</button>
+        `;
     }
-    S.expenses.push(item);
-  } else {
-    S.incomes.push(item);
-  }
-  save();closeM();render();
+    document.getElementById('mo').style.display = 'flex';
 }
-function subBudget(){
-  const v=parseFloat(document.getElementById('mbudget').value);
-  if(v>0)S.budget=v;
-  save();closeM();render();
+
+function renderAddModal(){
+    document.getElementById('mc').innerHTML = `
+        <div style="display:flex;background:var(--surf);border-radius:var(--r);padding:4px;margin-bottom:15px">
+            <button style="flex:1;padding:8px;border:none;border-radius:10px;background:${AF.type==='exp'?'#fff':'transparent'}" onclick="AF.type='exp';renderAddModal()">支出</button>
+            <button style="flex:1;padding:8px;border:none;border-radius:10px;background:${AF.type==='inc'?'#fff':'transparent'}" onclick="AF.type='inc';renderAddModal()">收入</button>
+        </div>
+        <input type="number" id="mamt" class="fi" placeholder="輸入金額" inputmode="decimal">
+        <input type="text" id="mdesc" class="fi" placeholder="描述(選填)">
+        <div class="sl">選擇分類</div>
+        <div style="margin-bottom:15px">${S.categories.map(c => `<span class="cat-tag ${AF.cat===c?'on':''}" onclick="AF.cat='${c}';renderAddModal()">${c}</span>`).join('')}</div>
+        <button class="sub" style="background:${AF.type==='exp'?'var(--maple)':'var(--m-green)'}" onclick="subAdd()">完成記帳</button>
+    `;
 }
-function subCard(){
-  const n=document.getElementById('mcn').value;if(!n)return;
-  S.cards.push({id:uid(),name:n,last4:document.getElementById('mcl4').value||'????',billingCycle:document.getElementById('mcb').value||'?',statementDate:document.getElementById('mcs').value||'?',dueDate:document.getElementById('mcd').value||'?'});
-  save();closeM();render();
+
+function subAdd(){
+    const amt = parseFloat(document.getElementById('mamt').value); if(!amt) return;
+    const item = { id: Date.now().toString(36), date: Date.now(), amount: amt, desc: document.getElementById('mdesc').value, cat: AF.cat };
+    if(AF.type==='exp') S.expenses.push(item); else S.incomes.push(item);
+    save(); closeM(); render();
 }
-function subPetty(){
-  const amt=parseFloat(document.getElementById('mpa').value);if(!amt||amt<=0)return;
-  const desc=document.getElementById('mpd').value,ts=Date.now();
-  S.petty.items.push({id:uid(),date:ts,amount:amt,desc});
-  S.expenses.push({id:uid(),date:ts,amount:amt,desc,method:'公司',cat:'公司'});
-  save();closeM();render();
+
+function delItem(id, type){
+    if(type==='exp') S.expenses = S.expenses.filter(e=>e.id!==id);
+    else S.incomes = S.incomes.filter(i=>i.id!==id);
+    save(); render();
 }
-function subPettyB(){const v=parseFloat(document.getElementById('mpb').value);if(v>0){S.petty.budget=v;save();closeM();render();}}
-function subFund(type){
-  const amt=parseFloat(document.getElementById('mfa').value);if(!amt||amt<=0)return;
-  const desc=document.getElementById('mfd').value;
-  if(type==='in')S.fund.balance+=amt;else S.fund.balance=Math.max(0,S.fund.balance-amt);
-  S.fund.txs.push({id:uid(),date:Date.now(),amount:amt,desc,type});
-  save();closeM();render();
+
+function setTab(t, btn, c){
+    tab = t; curC = c;
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('fab').style.background = FABCOL[c];
+    render();
 }
-function delItem(id, isInc){
-  if(isInc) S.incomes=S.incomes.filter(i=>i.id!==id);
-  else S.expenses=S.expenses.filter(e=>e.id!==id);
-  save();render();
-}
-function delCard(id){S.cards=S.cards.filter(c=>c.id!==id);save();render();}
-function delPetty(id){
-  const item=S.petty.items.find(e=>e.id===id);
-  if(item){S.petty.items=S.petty.items.filter(e=>e.id!==id);S.expenses=S.expenses.filter(e=>!(e.method==='公司'&&Math.abs(e.date-item.date)<2000&&e.amount===item.amount));}
-  save();render();
-}
-function delFundTx(id,type,amount){
-  S.fund.txs=S.fund.txs.filter(t=>t.id!==id);
-  if(type==='in')S.fund.balance=Math.max(0,S.fund.balance-amount);else S.fund.balance+=amount;
-  save();render();
-}
+function closeM(){ document.getElementById('mo').style.display='none'; }
+function closeOnBg(e){ if(e.target.id==='mo') closeM(); }
 load();
 </script>
-
 </body>
 </html>
