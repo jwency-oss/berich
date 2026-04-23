@@ -569,6 +569,93 @@ function commitRename(oldName, isInc) {
   renderAddModal();
 }
  
+// ═══ CALENDAR PICKER ═════════════════════════════════════════════════
+let calView = { y: 0, m: 0 }; // currently viewed year/month in calendar
+ 
+function openCalendar() {
+  const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc');
+  if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;
+  const sel = AF.date||todayStr();
+  const [sy,sm] = sel.split('-').map(Number);
+  calView = { y:sy, m:sm };
+  renderCalendar();
+}
+ 
+function renderCalendar() {
+  document.getElementById('cal-overlay')?.remove();
+  const sel = AF.date||todayStr();
+  const td = todayStr();
+  const { y, m } = calView;
+ 
+  // First day of month and total days
+  const firstDow = new Date(y, m-1, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const daysInPrev = new Date(y, m-1, 0).getDate();
+  const WDAYS = ['日','一','二','三','四','五','六'];
+ 
+  let dayCells = '';
+  // Prev month filler
+  for (let i = 0; i < firstDow; i++) {
+    const d = daysInPrev - firstDow + 1 + i;
+    dayCells += `<div style="padding:7px 0;text-align:center;font-size:13px;color:var(--textl);opacity:.4">${d}</div>`;
+  }
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === td;
+    const isSel = ds === sel;
+    const dow = (firstDow + d - 1) % 7;
+    const isSun = dow === 0, isSat = dow === 6;
+    let bg = 'transparent', color = isSun?'var(--maple)':isSat?'var(--navy)':'var(--text)';
+    let fw = '400', br = '50%', extra = '';
+    if (isSel) { bg='var(--maple)'; color='#fff'; fw='700'; }
+    else if (isToday) { bg='var(--maple-ll)'; color='var(--maple-d)'; fw='700'; extra='box-shadow:inset 0 0 0 1.5px var(--maple-l)'; }
+    dayCells += `<div onclick="selectCalDay('${ds}')" style="padding:7px 0;text-align:center;font-size:13px;font-weight:${fw};color:${color};background:${bg};border-radius:${br};cursor:pointer;${extra}">${d}</div>`;
+  }
+  // Next month filler
+  const total = firstDow + daysInMonth;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remain; i++) {
+    dayCells += `<div style="padding:7px 0;text-align:center;font-size:13px;color:var(--textl);opacity:.4">${i}</div>`;
+  }
+ 
+  const overlay = document.createElement('div');
+  overlay.id = 'cal-overlay';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:var(--card);border-radius:20px;padding:18px 16px 20px;width:100%;max-width:330px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <button onclick="calNav(-1)" style="width:34px;height:34px;background:var(--surf);border:none;border-radius:50%;cursor:pointer;font-size:16px;color:var(--textm);display:flex;align-items:center;justify-content:center">‹</button>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${y} 年 ${m} 月</div>
+        <button onclick="calNav(1)" style="width:34px;height:34px;background:var(--surf);border:none;border-radius:50%;cursor:pointer;font-size:16px;color:var(--textm);display:flex;align-items:center;justify-content:center">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">
+        ${WDAYS.map((w,i)=>`<div style="text-align:center;font-size:11px;font-weight:600;color:${i===0?'var(--maple)':i===6?'var(--navy)':'var(--textl)'};padding:3px 0">${w}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+        ${dayCells}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="selectCalDay('${td}')" style="flex:1;padding:9px;background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--green)">今天</button>
+        <button onclick="document.getElementById('cal-overlay').remove()" style="flex:1;padding:9px;background:var(--surf);border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>
+      </div>
+    </div>`;
+  document.getElementById('W').appendChild(overlay);
+}
+ 
+function calNav(dir) {
+  calView.m += dir;
+  if (calView.m > 12) { calView.m = 1; calView.y++; }
+  if (calView.m < 1)  { calView.m = 12; calView.y--; }
+  renderCalendar();
+}
+ 
+function selectCalDay(ds) {
+  AF.date = ds;
+  document.getElementById('cal-overlay')?.remove();
+  renderAddModal();
+}
+ 
 // ═══ ADD MODAL ════════════════════════════════════════════════════════
 function updateInstPreview() {
   const a=document.getElementById('mamt'),p=document.getElementById('mperd'),pv=document.getElementById('inst-preview');
@@ -581,9 +668,18 @@ function updateInstPreview() {
 }
 function setQPer(p){AF.periods=p;const el=document.getElementById('mperd');if(el)el.value=p;updateInstPreview();}
  
+function fmtDateDisplay(str) {
+  if (!str) return '今天';
+  const [y,m,d] = str.split('-');
+  const t = todayStr(), parts = t.split('-');
+  if (str === t) return '今天';
+  if (y === parts[0]) return `${parseInt(m)} 月 ${parseInt(d)} 日`;
+  return `${y}/${parseInt(m)}/${parseInt(d)}`;
+}
+ 
 function renderAddModal() {
-  const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc'),dtEl=document.getElementById('mdate');
-  if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;if(dtEl)AF.date=dtEl.value;
+  const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc');
+  if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;
   const acc=FABCOL[curC];
   const isInc=AF.type==='inc';
   const MCOLS={現金:'var(--yellow)',刷卡:'var(--navy)',公司:'var(--bean)',零用金:'var(--bean)'};
@@ -592,6 +688,7 @@ function renderAddModal() {
   const cats=isInc?S.incomeCategories:[...S.categories,...S.customCats.map(c=>c.name)];
   const selCat=isInc?AF.incCat:AF.cat;
   if(!AF.date)AF.date=todayStr();
+  const isToday2 = AF.date===todayStr();
  
   let html=`
     <div style="display:flex;gap:0;background:var(--surf);border-radius:var(--r);padding:3px;margin-bottom:14px">
@@ -601,9 +698,13 @@ function renderAddModal() {
     <div class="fg"><label class="fl">金額</label>
       <input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="${AF._a}" oninput="updateInstPreview()" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--maple)">
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div><label class="fl">日期</label>
-        <input class="fi" id="mdate" type="date" value="${AF.date}" style="padding:9px 10px;font-size:13px;color:var(--text)" onchange="AF.date=this.value">
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:end;margin-bottom:12px">
+      <div>
+        <label class="fl">日期</label>
+        <div style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:${isToday2?'var(--green-ll)':'var(--maple-ll)'};border:.5px solid ${isToday2?'var(--green-l)':'var(--maple-l)'};border-radius:20px;">
+          <span style="font-size:13px;font-weight:700;color:${isToday2?'var(--green)':'var(--maple)'}">${fmtDateDisplay(AF.date)}</span>
+          <button onclick="openCalendar()" style="background:${isToday2?'var(--green)':'var(--maple)'};border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0" title="選擇日期">🗓</button>
+        </div>
       </div>
       <div><label class="fl">描述（可略）</label>
         <input class="fi" id="mdesc" placeholder="咖啡、午餐…" value="${AF._d}">
@@ -757,8 +858,7 @@ function closeOnBg(e){if(e.target===document.getElementById('mo'))closeM();}
 function subAdd() {
   const amt=parseFloat(document.getElementById('mamt').value);if(!amt||amt<=0)return;
   const desc=document.getElementById('mdesc').value;
-  const dateVal=document.getElementById('mdate')?.value||AF.date||todayStr();
-  const ts=dateToTs(dateVal);
+  const ts=dateToTs(AF.date||todayStr());
   if (AF.type==='inc') {
     S.incomes.push({id:uid(),date:ts,amount:amt,desc,cat:AF.incCat,method:'現金',isFund:false});
   } else {
