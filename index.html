@@ -274,6 +274,11 @@ function rToday() {
 }
 function changeDate(n) { viewDate = new Date(viewDate.getTime()+n*86400000); render(); }
 
+function changeMonth(n) {
+  viewDate.setMonth(viewDate.getMonth() + n);
+  render();
+}
+
 // ═══ ENTRY CARD ══════════════════════════════════════════════════════
 function eiCard(e) {
   const isInc = e._type==='inc';
@@ -700,11 +705,9 @@ function renderAddModal() {
     </div>
     <div class="fg">
       <label class="fl">日期</label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="display:inline-flex;align-items:center;gap:8px;padding:9px 14px;background:${isToday2?'var(--green-ll)':'var(--maple-ll)'};border:.5px solid ${isToday2?'var(--green-l)':'var(--maple-l)'};border-radius:20px;">
-          <span style="font-size:13px;font-weight:700;color:${isToday2?'var(--green)':'var(--maple)'}">${fmtDateDisplay(AF.date)}</span>
-          <button onclick="openCalendar()" style="width:22px;height:22px;background:${isToday2?'var(--green)':'var(--maple)'};border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0">\u270F</button>
-        </div>
+      <div onclick="openCalendar()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf);border:1px solid ${isToday2?'var(--green-l)':'var(--maple-l)'};border-radius:var(--r);cursor:pointer">
+        <span style="font-size:14px;font-weight:700;color:${isToday2?'var(--green)':'var(--maple)'}">${fmtDateDisplay(AF.date)}</span>
+        <span style="font-size:12px;color:var(--textl);background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:3px 10px">點此換日期</span>
       </div>
     </div>
     <div class="fg"><label class="fl">描述（可略）</label>
