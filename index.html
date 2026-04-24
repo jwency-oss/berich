@@ -3,12 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>Rich記帳</title>
+<title>Berich</title>
 <meta name="theme-color" content="#B85550">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Rich記帳">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<link rel="apple-touch-icon" id="pwa-icon" href="">
+<link rel="manifest" id="pwa-manifest" href="">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<meta name="theme-color" content="#B85550">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -116,13 +124,13 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
 </div>
 <script>
 // ─── CONSTANTS ──────────────────────────────────────────────────────
-const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司','自訂一','自訂二','自訂三'];
-const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦',自訂一:'✨',自訂二:'✨',自訂三:'✨',收自訂一:'✨',收自訂二:'✨',收自訂三:'✨'};
-const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A',自訂一:'#9A9298',自訂二:'#9A9298',自訂三:'#9A9298',收自訂一:'#6B8F72',收自訂二:'#6B8F72',收自訂三:'#6B8F72'};
+const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'];
+const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦'};
+const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A'};
 const XCOL=['#B85550','#8CA08A','#7A6C9A','#C4A890','#7AA4B2','#CC8874','#B0A050','#889880'];
 const CC_BG=['linear-gradient(140deg,#566D82,#3A4E64)','linear-gradient(140deg,#6B8F72,#4A7055)','linear-gradient(140deg,#7A6C9A,#5A4C7A)','linear-gradient(140deg,#B85550,#8A3530)','linear-gradient(140deg,#8CA08A,#6A8068)'];
 const ACC_ICONS={現金:'💵',銀行:'🏦',電子錢包:'📱',悠遊卡:'🎫',其他:'💰'};
-const ACC_COLS={現金:'#C9A85C',銀行:'566D82',電子錢包:'#6B8F72',悠遊卡:'#789098',其他:'#9A9298'};
+const ACC_COLS={現金:'#C9A85C',銀行:'#566D82',電子錢包:'#6B8F72',悠遊卡:'#789098',其他:'#9A9298'};
 const FABCOL={y:'#6B8F72',b:'#566D82',a:'#B85550',p:'#8CA08A',r:'#7A6C9A'};
 
 // ─── STATE ──────────────────────────────────────────────────────────
@@ -133,7 +141,7 @@ let S={
   petty:{budget:5000}, fund:{balance:0},
   tabNames:{petty:'零用金',fund:'私房錢'},
   categories:[...CAT_DEF], customCats:[],
-  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三']
+  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手']
 };
 let viewDate=new Date(), tab='today', curC='y', chartPer='month';
 let AF={type:'exp',cat:'飲食',incCat:'薪資',date:'',method:'現金',cardId:null,accId:null,inst:false,periods:3,_a:'',_d:'',editingId:null};
@@ -146,20 +154,64 @@ const fmtD=ts=>new Date(ts).toLocaleDateString('zh-TW',{month:'numeric',day:'num
 const fmtT=ts=>new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
 const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const dateToTs=str=>{const[y,m,d]=str.split('-').map(Number);const n=new Date();return new Date(y,m-1,d,n.getHours(),n.getMinutes()).getTime()};
-const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const sameDay=(ts,ref)=>new Date(ts).toDateString()===ref.toDateString();
 const personal=e=>!e.isFund&&e.method!=='零用金';
-const getBilled=e=>{if(!e.inst||!e.inst.on)return 0;let sd=31;if(e.cardId){const c=S.cards.find(x=>x.id===e.cardId);if(c&&parseInt(c.statementDate))sd=parseInt(c.statementDate);}const tx=new Date(e.date);let fY=tx.getFullYear(),fM=tx.getMonth();if(tx.getDate()>sd)fM+=1;const n=new Date();let b=(n.getFullYear()-fY)*12+(n.getMonth()-fM);if(n.getDate()>=sd)b+=1;return b;};
+// 計算分期已繳幾期：依信用卡結帳日計算，不是用30天估算
+// purchaseTs=刷卡時間戳, totalPeriods=總期數, cardId=信用卡id
+function curPer(purchaseTs, totalPeriods, cardId){
+  const card = cardId ? S.cards.find(c=>c.id===cardId) : null;
+  const statDay = card ? parseInt(card.statementDate) : NaN;
+  
+  if(!card || isNaN(statDay) || statDay<1 || statDay>31){
+    // 沒有卡片資訊，fallback: 30天一期
+    return Math.min(totalPeriods, Math.max(0, Math.floor((Date.now()-purchaseTs)/(1000*60*60*24*30))));
+  }
+
+  const buyDate = new Date(purchaseTs);
+  const now = new Date();
+  let periods = 0;
+
+  // 從刷卡月份開始，數有幾個結帳日已過
+  let y = buyDate.getFullYear();
+  let m = buyDate.getMonth() + 1; // 1-12
+
+  // 刷卡當月的結帳日
+  // 若刷卡日 <= 結帳日，本月結帳日已可算；否則從下個月算起
+  let checkY = y, checkM = m;
+  const statDateThisMonth = new Date(y, m-1, statDay);
+  if(buyDate > statDateThisMonth){
+    // 已過本月結帳日，從下個月結帳日開始算第一期
+    checkM++;
+    if(checkM > 12){ checkM = 1; checkY++; }
+  }
+
+  // 數從 checkY/checkM 的結帳日起，到今天為止有幾個結帳日已過
+  for(let i=0; i<totalPeriods; i++){
+    const billing = new Date(checkY, checkM-1, statDay);
+    if(billing <= now){
+      periods++;
+    } else {
+      break;
+    }
+    checkM++;
+    if(checkM > 12){ checkM = 1; checkY++; }
+  }
+
+  return Math.min(totalPeriods, periods);
+}
 const allCats=()=>[...S.categories,...S.customCats.map(c=>c.name)];
 const catIcon=c=>CAT_ICONS[c]||'📌';
 const catCol=c=>{if(CAT_COL[c])return CAT_COL[c];const x=S.customCats.find(x=>x.name===c);return x?x.color:'#9A9298'};
 const fmtDateDisp=str=>{if(!str||str===todayStr())return'今天';const[y,m,d]=str.split('-');return str.slice(0,4)===todayStr().slice(0,4)?parseInt(m)+'月'+parseInt(d)+'日':y+'/'+parseInt(m)+'/'+parseInt(d)};
+const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const accBal=aid=>{
   const a=S.accounts.find(x=>x.id===aid);if(!a)return 0;
   let b=a.initBal||0;
   S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>b+=i.amount);
   S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>b-=e.amount);
+  // 轉入：只計真實帳戶間的轉帳（排除信用卡還款的虛擬轉入）
   S.transfers.filter(t=>t.toId===aid).forEach(t=>b+=t.amount);
+  // 轉出：包含信用卡還款
   S.transfers.filter(t=>t.fromId===aid).forEach(t=>b-=t.amount);
   return b;
 };
@@ -170,9 +222,8 @@ const accCol=a=>ACC_COLS[a.type]||'#9A9298';
 // ─── STORAGE ────────────────────────────────────────────────────────
 function load(){
   try{const d=localStorage.getItem('Berich_V10');if(d)Object.assign(S,JSON.parse(d));
-    if(!S.categories)S.categories=[...CAT_DEF];
-    if(!S.customCats)S.customCats=[];
-    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三'];
+    if(!S.categories)S.categories=[...CAT_DEF];if(!S.customCats)S.customCats=[];
+    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手'];
     if(!S.petty)S.petty={budget:5000};if(!S.fund)S.fund={balance:0};
     if(!S.incomes)S.incomes=[];if(!S.cards)S.cards=[];
     if(!S.accounts||!S.accounts.length)S.accounts=[{id:'acc-cash',name:'現金',type:'現金',initBal:0}];
@@ -180,19 +231,11 @@ function load(){
     if(!S.tabNames)S.tabNames={petty:'零用金',fund:'私房錢'};
     if(!S.tabNames.petty)S.tabNames.petty='零用金';
     if(!S.tabNames.fund)S.tabNames.fund='私房錢';
-    if(!S.categories.includes('自訂一') && !S.categories.some(c=>c.includes('自訂'))) S.categories.push('自訂一','自訂二','自訂三');
-    if(!S.incomeCategories.includes('收自訂一') && !S.incomeCategories.some(c=>c.includes('收自訂'))) S.incomeCategories.push('收自訂一','收自訂二','收自訂三');
   }catch(e){}
   checkRecurring();render();
+  initPWAIcon();
 }
 const save=()=>{try{localStorage.setItem('Berich_V10',JSON.stringify(S));}catch(e){}};
-
-function clearAllData(){
-  if(confirm('確定要清空所有測試資料嗎？\n此動作無法復原喔！')){
-    localStorage.removeItem('Berich_V10');
-    location.reload();
-  }
-}
 
 // ─── RECURRING CHECK ────────────────────────────────────────────────
 function checkRecurring(){
@@ -284,11 +327,22 @@ function updateTabLabels(){
   const tf=document.getElementById('tab-fund');if(tf)tf.textContent=S.tabNames.fund||'私房錢';
   const fl=document.getElementById('fund-name-lbl');if(fl)fl.textContent=S.tabNames.fund||'私房錢';
 }
+let _rdTimer=null,_rdInterval=null;
+function rdStart(n){
+  changeDate(n);
+  _rdTimer=setTimeout(()=>{_rdInterval=setInterval(()=>changeDate(n),120);},500);
+}
+function rdStop(){
+  if(_rdTimer){clearTimeout(_rdTimer);_rdTimer=null;}
+  if(_rdInterval){clearInterval(_rdInterval);_rdInterval=null;}
+}
+function goToday(){viewDate=new Date();render();}
 
 // ─── ACCOUNT DETAIL VIEW ────────────────────────────────────────────
 function showAccDetail(aid){
   const a=S.accounts.find(x=>x.id===aid);if(!a)return;
   const bal=accBal(aid);
+  // Gather all transactions for this account
   const txList=[];
   S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>txList.push({...i,_dir:'in'}));
   S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>txList.push({...e,_dir:'out'}));
@@ -336,7 +390,9 @@ function showAccDetail(aid){
 }
 
 // ─── CARD DETAIL VIEW ────────────────────────────────────────────────
+// card detail state
 let _cdCid='', _cdY=0, _cdM=0;
+
 function showCardDetail(cid){
   _cdCid=cid;
   const now=new Date();_cdY=now.getFullYear();_cdM=now.getMonth()+1;
@@ -352,18 +408,25 @@ function renderCardDetail(){
   const card=S.cards.find(c=>c.id===_cdCid);if(!card)return;
   const allExps=S.expenses.filter(e=>e.cardId===_cdCid).sort((a,b)=>b.date-a.date);
   const allPays=S.transfers.filter(t=>t.toCardId===_cdCid);
+
+  // Filter current month
   const mExps=allExps.filter(e=>{const d=new Date(e.date);return d.getFullYear()===_cdY&&d.getMonth()+1===_cdM;});
   const mPays=allPays.filter(t=>{const d=new Date(t.date);return d.getFullYear()===_cdY&&d.getMonth()+1===_cdM;});
   const mTot=mExps.reduce((s,e)=>s+e.amount,0);
   const mPaid=mPays.reduce((s,t)=>s+t.amount,0);
+
+  // All-time totals for header
   const tot=allExps.reduce((s,e)=>s+e.amount,0);
   const paidTot=allPays.reduce((s,t)=>s+t.amount,0);
   const unpaid=tot-paidTot;
+
   const now=new Date();
   const isCurrent=_cdY===now.getFullYear()&&_cdM===now.getMonth()+1;
   const monthLabel=_cdY+'年'+_cdM+'月';
 
-  let h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
+  let h='';
+  // Header
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
     '<button onclick="closeM()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 4px 0 0;line-height:1">&#8249;</button>'+
     '<div style="flex:1"><div style="font-size:17px;font-weight:700;color:var(--text)">'+card.name+'</div>'+
     '<div style="font-size:11px;color:var(--textl)">**** '+(card.last4||'????')+'</div></div>'+
@@ -372,6 +435,7 @@ function renderCardDetail(){
       '<div style="font-size:11px;color:var(--green);font-weight:600">✓ 已繳清</div>')+
   '</div>';
 
+  // Month navigator
   h+='<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surf);border-radius:20px;padding:6px 6px;margin-bottom:14px">'+
     '<button onclick="navCardMonth(-1)" style="width:34px;height:34px;background:var(--card);border:none;border-radius:50%;cursor:pointer;font-size:18px;color:var(--textm);display:flex;align-items:center;justify-content:center">&#8249;</button>'+
     '<div style="text-align:center">'+
@@ -381,6 +445,7 @@ function renderCardDetail(){
     '<button onclick="navCardMonth(1)" style="width:34px;height:34px;background:var(--card);border:none;border-radius:50%;cursor:pointer;font-size:18px;color:var(--textm);display:flex;align-items:center;justify-content:center">&#8250;</button>'+
   '</div>';
 
+  // Monthly expense list
   if(!mExps.length&&!mPays.length){
     h+='<div class="empty">'+monthLabel+'沒有記錄</div>';
   } else {
@@ -390,13 +455,8 @@ function renderCardDetail(){
         const cc=e.cat?catCol(e.cat):'#9A9298';
         const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
         let ib='';
-        if(e.inst&&e.inst.on){
-          const b=getBilled(e);
-          const cp=Math.max(0,Math.min(e.inst.periods,b));
-          const done=b>=e.inst.periods;
-          const pt=Math.min(100,Math.round(cp/e.inst.periods*100));
-          const statTxt=b<=0?'未出帳':(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期');
-          ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+statTxt+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';
+        if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods,e.cardId),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));
+          ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';
         }
         h+='<div class="ei"><div class="eirow">'+
           '<div class="eico" style="background:var(--navy-ll)">💳</div>'+
@@ -417,6 +477,7 @@ function renderCardDetail(){
       });
     }
   }
+
   document.getElementById('mc').innerHTML=h;
   document.getElementById('mo').style.display='flex';
 }
@@ -551,14 +612,16 @@ let _dlpTimer=null;
 function dateLpStart(){
   _dlpTimer=setTimeout(()=>{
     _dlpTimer=null;
+    // Open calendar centred on current viewDate
     const[sy,sm]=[viewDate.getFullYear(),viewDate.getMonth()+1];
     calView={y:sy,m:sm};
+    // Override selDay to update viewDate instead of AF.date
     _calMode='view';
     drawCal();
   },500);
 }
 function dateLpEnd(){if(_dlpTimer){clearTimeout(_dlpTimer);_dlpTimer=null;}}
-let _calMode='add';
+let _calMode='add'; // 'add' | 'view'
 
 // ─── ENTRY CARD ─────────────────────────────────────────────────────
 function eiCard(e){
@@ -570,19 +633,17 @@ function eiCard(e){
   const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
   const card=e.cardId?S.cards.find(c=>c.id===e.cardId):null;
   const cardtag=card?'<span class="tag" style="background:var(--navy-ll);color:var(--navy)">'+card.name+'</span>':'';
-  const itag=e.inst&&e.inst.on?'<span class="tag" style="background:var(--plum-ll);color:var(--plum)">'+Math.max(0,Math.min(e.inst.periods,getBilled(e)))+'/'+e.inst.periods+'期</span>':'';
+  const _icp=e.inst&&e.inst.on?curPer(e.date,e.inst.periods,e.cardId):0;
+  const itag=e.inst&&e.inst.on?(_icp===0?'<span class="tag" style="background:var(--yellow-ll);color:var(--yellow)">待入帳</span>':'<span class="tag" style="background:var(--plum-ll);color:var(--plum)">'+_icp+'/'+e.inst.periods+'期</span>'):'';
   const acc=e.accId?S.accounts.find(a=>a.id===e.accId):null;
   const atag=acc?'<span class="tag" style="background:'+accCol(acc)+'20;color:'+accCol(acc)+'">'+accIcon(acc)+' '+acc.name+'</span>':'';
   const delfn=isInc?'delInc(\''+e.id+'\')':'delExp(\''+e.id+'\')';
   let ibar='';
-  if(!isInc&&e.inst&&e.inst.on){
-    const b=getBilled(e);
-    const cp=Math.max(0,Math.min(e.inst.periods,b));
-    const done=b>=e.inst.periods;
-    const pt=Math.min(100,Math.round(cp/e.inst.periods*100));
-    const statTxt=b<=0?'未出帳':(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期');
-    ibar='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+statTxt+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';
-  }
+  if(!isInc&&e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods,e.cardId),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));
+    const statusLabel=cp===0?'⏳ 待入帳（尚未結帳）':done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期';
+    const statusColor=cp===0?'var(--yellow)':done?'var(--yellow)':'var(--plum)';
+    const barColor=cp===0?'var(--yellow)':done?'var(--yellow)':'var(--plum)';
+    ibar='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:'+statusColor+';font-weight:500">'+statusLabel+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+barColor+';width:'+pt+'%"></div></div></div>';}
   const lpProps='onmousedown="editLp(\''+e.id+'\','+isInc+')" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp(\''+e.id+'\','+isInc+')" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"';
   return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:'+bg+'">'+ico+'</div><div class="en"><div class="ename">'+(e.desc||'消費')+'</div><div class="emeta">'+ctag+cardtag+itag+atag+'<span style="color:var(--textl)">'+fmtT(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:700;color:'+(isInc?'var(--green)':col)+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();'+delfn+'">✕</button></div></div>'+ibar+'</div>';
 }
@@ -621,7 +682,7 @@ function rCards(){
     const tot=exps.reduce((s,e)=>s+e.amount,0);
     const paidTot=S.transfers.filter(t=>t.toCardId===card.id).reduce((s,t)=>s+t.amount,0);
     const unpaid=tot-paidTot;
-    const instMo=exps.reduce((s,e)=>{if(e.inst&&e.inst.on){const b=getBilled(e);return (b>0&&b<=e.inst.periods)?s+e.inst.monthly:s;}return s;},0);
+    const instMo=exps.reduce((s,e)=>{if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods,e.cardId);return cp<e.inst.periods?s+e.inst.monthly:s;}return s;},0);
     const lpCard=`onmousedown="cardLp('${card.id}')" onmouseup="cardLpEnd()" onmouseleave="cardLpEnd()" ontouchstart="cardLp('${card.id}')" ontouchend="cardLpEnd()" ontouchmove="cardLpEnd()"`;
     // Card visual block
     h+='<div onclick="if(!_lpFired)showCardDetail(\''+card.id+'\')" style="background:'+CC_BG[i%CC_BG.length]+';border-radius:16px;padding:18px 18px 14px;margin-bottom:8px;color:#fff;position:relative;user-select:none;-webkit-user-select:none;cursor:pointer" '+lpCard+'>'+
@@ -679,22 +740,12 @@ function rAccounts(){
 // ─── PETTY TAB ──────────────────────────────────────────────────────
 function rPetty(){
   const exps=S.expenses.filter(e=>e.method==='零用金');
-  const incs=S.incomes.filter(i=>i.method==='零用金');
-  const tE=exps.reduce((s,e)=>s+e.amount,0);
-  const tI=incs.reduce((s,i)=>s+i.amount,0);
-  const netExp = tE - tI;
-  const rem=(S.petty.budget||5000)-netExp;
-  const pct=Math.max(0,Math.min(100,netExp/(S.petty.budget||5000)*100));
-  const all=[...exps.map(e=>({...e,_t:'exp'})),...incs.map(i=>({...i,_t:'inc'}))].sort((a,b)=>b.date-a.date);
-  
-  return '<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">'+(S.tabNames.petty||'零用金')+'餘額</div><div class="sv" style="color:var(--bean)">'+fmt(rem)+'</div></div><div style="text-align:right"><div class="sl">淨支出</div><div class="sv" style="color:var(--maple)">'+fmt(netExp)+'</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--bean);width:'+pct+'%;border-radius:3px;transition:width .4s"></div></div></div>'+
-  '<div style="display:flex;gap:7px;margin-bottom:14px"><button class="ab" style="margin:0;flex:1;border-color:var(--bean);color:var(--bean)" onclick="showM(\'addPetty\')">＋ 新增紀錄</button><button class="ab" style="margin:0;flex:1" onclick="showM(\'setPetty\')">設定額度</button></div>'+
-  '<div class="sec">'+(S.tabNames.petty||'零用金')+'明細</div>'+(!all.length?'<div class="empty">還沒有零用金記錄</div>':all.map(e=>{
-    const isInc = e._t==='inc';
-    const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
-    const lpProps=`onmousedown="editLp('${e.id}',${isInc})" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',${isInc})" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
-    const delfn = isInc ? 'delInc' : 'delExp';
-    return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:'+(isInc?'var(--green-ll)':'var(--bean-ll)')+'">'+(isInc?'💹':'🏢')+'</div><div class="en"><div class="ename">'+(e.desc||(isInc?'零用金收入':'零用金支出'))+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:'+(isInc?'var(--green)':'var(--bean)')+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();'+delfn+'(\''+e.id+'\')">✕</button></div></div></div>';
+  const tot=exps.reduce((s,e)=>s+e.amount,0),rem=(S.petty.budget||5000)-tot;
+  const pct=Math.max(0,Math.min(100,tot/(S.petty.budget||5000)*100));
+  return '<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">'+(S.tabNames.petty||'零用金')+'餘額</div><div class="sv" style="color:var(--bean)">'+fmt(rem)+'</div></div><div style="text-align:right"><div class="sl">已使用</div><div class="sv" style="color:var(--maple)">'+fmt(tot)+'</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--bean);width:'+pct+'%;border-radius:3px;transition:width .4s"></div></div></div>'+
+  '<div style="display:flex;gap:7px;margin-bottom:14px"><button class="ab" style="margin:0;flex:1;border-color:var(--bean);color:var(--bean)" onclick="showM(\'addPetty\')">＋ 新增支出</button><button class="ab" style="margin:0;flex:1" onclick="showM(\'setPetty\')">設定額度</button></div>'+
+  '<div class="sec">'+(S.tabNames.petty||'零用金')+'明細</div>'+(!exps.length?'<div class="empty">還沒有零用金記錄</div>':exps.slice().reverse().map(e=>{const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
+    return '<div class="ei"><div class="eirow"><div class="eico" style="background:var(--bean-ll)">🏢</div><div class="en"><div class="ename">'+(e.desc||'零用金支出')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--bean)">-'+fmt(e.amount)+'</div><button class="db" onclick="delExp(\''+e.id+'\')">✕</button></div></div></div>';
   }).join(''));
 }
 
@@ -748,6 +799,8 @@ function showCatMgmt(){
       '<button onclick="showChart()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 8px 0 0;line-height:1">&#8249;</button>'+
       '<div class="mtitle" style="margin:0;flex:1;text-align:center">管理分類</div>'+
     '</div>'+
+
+    // ── 支出分類 ──
     '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">支出分類 <span style="color:var(--textl);font-weight:400;font-size:11px">（點鉛筆改名）</span></div>'+
     '<div style="background:var(--card);border-radius:var(--r);border:.5px solid var(--bdr);overflow:hidden;margin-bottom:14px">'+
       S.categories.map((c,i)=>{
@@ -765,6 +818,8 @@ function showCatMgmt(){
       '<input class="fi" id="new-exp-cat" placeholder="新增支出分類..." style="margin:0;flex:1">'+
       '<button style="background:var(--maple);color:#fff;border:none;border-radius:var(--r);padding:0 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;flex-shrink:0" onclick="subAddExpCat()">新增</button>'+
     '</div>'+
+
+    // ── 收入分類 ──
     '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">收入分類 <span style="color:var(--textl);font-weight:400;font-size:11px">（點鉛筆改名）</span></div>'+
     '<div style="background:var(--card);border-radius:var(--r);border:.5px solid var(--bdr);overflow:hidden;margin-bottom:14px">'+
       S.incomeCategories.map((c,i)=>{
@@ -784,6 +839,7 @@ function showCatMgmt(){
     '</div>';
 }
 
+// 改名（直接從管理頁）
 function showRenameCatDirect(old, isInc){
   const ov=document.createElement('div');ov.id='ren-ov-direct';
   ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
@@ -807,6 +863,7 @@ function doRenameDirect(old,isInc){
   save();document.getElementById('ren-ov-direct')?.remove();showCatMgmt();
 }
 
+// 新增分類
 function subAddExpCat(){
   const n=(document.getElementById('new-exp-cat')?.value||'').trim();if(!n)return;
   if([...S.categories,...S.customCats.map(c=>c.name),...S.incomeCategories].includes(n)){alert('名稱已存在');return;}
@@ -818,6 +875,7 @@ function subAddIncCat(){
   S.incomeCategories.push(n);save();showCatMgmt();
 }
 
+// 刪除確認
 function confirmDelExpCat(name){
   if(S.categories.length<=1){alert('至少保留一個支出分類');return;}
   if(!confirm('刪除「'+name+'」？已有此分類的記錄不受影響。')){return;}
@@ -829,6 +887,7 @@ function confirmDelIncCat(name){
   S.incomeCategories=S.incomeCategories.filter(c=>c!==name);save();showCatMgmt();
 }
 
+// 保留舊的 subAddCat / delCat 供相容
 function subAddCat(){subAddExpCat();}
 function delCat(n){S.customCats=S.customCats.filter(c=>c.name!==n);save();showCatMgmt();}
 
@@ -949,7 +1008,6 @@ function setQP(p){AF.periods=p;const el=document.getElementById('mperd');if(el)e
 
 function renderAddModal(){
   const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc');if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;
-  if(AF.type==='inc' && AF.method==='刷卡') AF.method='現金';
   if(!AF.date)AF.date=todayStr();
   const acc=FABCOL[curC],isInc=AF.type==='inc',isTd=AF.date===todayStr();
   const MC={現金:'var(--yellow)',刷卡:'var(--navy)',零用金:'var(--bean)'};
@@ -1006,7 +1064,7 @@ function renderAddModal(){
   '<div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label class="fl" style="margin:0">分類</label><span style="font-size:10px;color:var(--textl)">久按可改名</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
       cats.map(c=>{const on=selCat===c,cc=catCol(c);const clickFn=isInc?"AF.incCat='"+c+"'":'AF.cat=\''+c+'\'';
-        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+'" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+')" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
+        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+'" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()">'+catIcon(c)+' '+c+'</button>';
       }).join('')+
     '</div>'+
   '</div>';
@@ -1039,7 +1097,7 @@ function renderAddModal(){
 // ─── MODALS ─────────────────────────────────────────────────────────
 function showM(type){
   const mc=document.getElementById('mc'),acc=FABCOL[curC];
-  mc.innerHTML=''; // <-- 防呆：打開新視窗時，強制清空舊資料，避免殘留
+  mc.innerHTML='';
   if(type==='add'){
     AF.editingId=null;
     AF.type='exp';AF.cat=allCats()[0]||CAT_DEF[0];AF.incCat=S.incomeCategories[0]||'薪資';
@@ -1060,8 +1118,7 @@ function showM(type){
         '<div class="srow" onclick="showChart(\'month\');return false"><span style="font-size:13px;font-weight:600;color:var(--text)">📊 支出分析</span><span style="color:var(--textl);font-size:13px">&#8250;</span></div>'+
       '</div>'+
       '<button class="sub" style="background:var(--maple)" onclick="subSettings()">儲存設定</button>'+
-      '<button onclick="showReport()" style="width:100%;padding:10px;background:none;border:.5px solid var(--bdr);border-radius:var(--r);font-size:13px;color:var(--textm);cursor:pointer;font-family:inherit;margin-top:8px">📋 本月結算報告</button>'+
-      '<button onclick="clearAllData()" style="width:100%;padding:10px;background:var(--maple-lll);border:1px solid var(--maple-l);border-radius:var(--r);font-size:13px;color:var(--maple-d);cursor:pointer;font-family:inherit;margin-top:8px;font-weight:700">🗑 刪除所有測試資料 (恢復出廠)</button>';
+      '<button onclick="showReport()" style="width:100%;padding:10px;background:none;border:.5px solid var(--bdr);border-radius:var(--r);font-size:13px;color:var(--textm);cursor:pointer;font-family:inherit;margin-top:8px">📋 本月結算報告</button>';
   }else if(type==='addCard'){
     mc.innerHTML='<div class="mtitle">新增信用卡</div>'+
       '<div class="fg"><label class="fl">卡片名稱</label><input class="fi" id="mcn" placeholder="台新玫瑰卡、國泰世華..."></div>'+
@@ -1091,8 +1148,7 @@ function showM(type){
       '<div class="fg"><label class="fl">備註（可略）</label><input class="fi" id="xnote" placeholder="備註..."></div>'+
       '<button class="sub" style="background:var(--navy)" onclick="subXfer()">確認轉帳</button>';
   }else if(type==='addPetty'){
-    mc.innerHTML='<div class="mtitle">新增零用金紀錄</div>'+
-      '<div class="fg"><label class="fl">類型</label><div style="display:flex;gap:8px"><label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);cursor:pointer"><input type="radio" name="ptype" value="exp" checked> <span style="font-size:13px;font-weight:600;color:var(--maple)">支出</span></label><label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);cursor:pointer"><input type="radio" name="ptype" value="inc"> <span style="font-size:13px;font-weight:600;color:var(--green)">收入</span></label></div></div>'+
+    mc.innerHTML='<div class="mtitle">新增零用金支出</div>'+
       '<div class="fg"><label class="fl">金額</label><input class="fi" id="mpa" type="number" placeholder="0" inputmode="decimal"></div>'+
       '<div class="fg"><label class="fl">描述（可略）</label><input class="fi" id="mpd" placeholder="描述..."></div>'+
       '<button class="sub" style="background:var(--bean)" onclick="subPetty()">記帳</button>';
@@ -1205,6 +1261,48 @@ function delFundExp(id){const e=S.expenses.find(x=>x.id===id);if(e){S.fund.balan
 function delFundInc(id){const i=S.incomes.find(x=>x.id===id);if(i){S.fund.balance=Math.max(0,S.fund.balance-i.amount);S.incomes=S.incomes.filter(x=>x.id!==id);}save();render();}
 function delCard(id){S.cards=S.cards.filter(c=>c.id!==id);save();render();}
 function delAcc(id){if(S.accounts.length<=1){alert('至少保留一個帳戶');return;}S.accounts=S.accounts.filter(a=>a.id!==id);S.transfers=S.transfers.filter(t=>t.fromId!==id&&t.toId!==id);save();if(tab==='accounts')renderBody();else render();}
+
+// ─── PWA ICON (canvas-generated, no external files needed) ──────────
+function initPWAIcon(){
+  const S2=192,R=42;
+  const cv=document.createElement('canvas');cv.width=cv.height=S2;
+  const cx=cv.getContext('2d');
+  // Rounded rect background
+  cx.beginPath();cx.moveTo(R,0);cx.lineTo(S2-R,0);cx.arcTo(S2,0,S2,R,R);
+  cx.lineTo(S2,S2-R);cx.arcTo(S2,S2,S2-R,S2,R);cx.lineTo(R,S2);cx.arcTo(0,S2,0,S2-R,R);
+  cx.lineTo(0,R);cx.arcTo(0,0,R,0,R);cx.closePath();
+  cx.fillStyle='#B85550';cx.fill();
+  // Big circle (white)
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.fillStyle='rgba(255,255,255,0.95)';cx.fill();
+  // Ring on big circle
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.strokeStyle='rgba(184,85,80,0.25)';cx.lineWidth=5;cx.stroke();
+  // "B" letter
+  cx.fillStyle='#8A3530';
+  cx.font='900 52px Impact,Arial Black,sans-serif';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('B',96,76);
+  // Neck
+  cx.fillStyle='rgba(255,255,255,0.88)';
+  cx.beginPath();cx.roundRect(89,121,14,18,4);cx.fill();
+  // Small circle (plum)
+  cx.beginPath();cx.arc(96,158,26,0,Math.PI*2);
+  cx.fillStyle='#7A6C9A';cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.9)';
+  cx.font='bold 11px -apple-system,PingFang TC,sans-serif';
+  cx.fillText('私房錢',96,158);
+
+  const url=cv.toDataURL('image/png');
+  document.getElementById('pwa-icon').href=url;
+
+  // Dynamic manifest so Chrome/Android also gets icon
+  const mf={name:'Berich 記帳',short_name:'Berich',start_url:location.href,
+    display:'standalone',background_color:'#F4EBE8',theme_color:'#B85550',
+    icons:[{src:url,sizes:'192x192',type:'image/png',purpose:'any maskable'}]};
+  const blob=new Blob([JSON.stringify(mf)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
+}
 
 load();
 </script>
