@@ -3,12 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>Rich記帳</title>
+<title>Berich</title>
 <meta name="theme-color" content="#B85550">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Rich記帳">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<link rel="apple-touch-icon" id="pwa-icon" href="">
+<link rel="manifest" id="pwa-manifest" href="">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<meta name="theme-color" content="#B85550">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -107,18 +115,17 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
   </div>
   <button id="fab" onclick="showM('add')" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;width:56px;height:56px;border-radius:50%;border:none;font-size:28px;box-shadow:0 4px 16px rgba(107,143,114,.45);z-index:10;cursor:pointer">+</button>
   <div id="mo" onclick="closeOnBg(event)" style="display:none;position:absolute;inset:0;background:rgba(30,22,20,.35);z-index:50;align-items:flex-end">
-    <div id="mpanel" style="background:var(--card);border-radius:22px 22px 0 0;padding:12px 18px 36px;width:100%;max-height:93%;overflow-y:auto;position:relative">
+    <div id="mpanel" style="background:var(--card);border-radius:22px 22px 0 0;padding:12px 18px 36px;width:100%;max-height:93%;overflow-y:auto">
       <div style="width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px"></div>
-      <button onclick="closeM()" style="position:absolute;top:12px;right:16px;background:var(--surf);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--textm);cursor:pointer;z-index:10">✕</button>
       <div id="mc"></div>
     </div>
   </div>
 </div>
 <script>
 // ─── CONSTANTS ──────────────────────────────────────────────────────
-const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司','自訂一','自訂二','自訂三'];
-const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦',自訂一:'✨',自訂二:'✨',自訂三:'✨',收自訂一:'✨',收自訂二:'✨',收自訂三:'✨'};
-const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A',自訂一:'#9A9298',自訂二:'#9A9298',自訂三:'#9A9298',收自訂一:'#6B8F72',收自訂二:'#6B8F72',收自訂三:'#6B8F72'};
+const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'];
+const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦'};
+const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A'};
 const XCOL=['#B85550','#8CA08A','#7A6C9A','#C4A890','#7AA4B2','#CC8874','#B0A050','#889880'];
 const CC_BG=['linear-gradient(140deg,#566D82,#3A4E64)','linear-gradient(140deg,#6B8F72,#4A7055)','linear-gradient(140deg,#7A6C9A,#5A4C7A)','linear-gradient(140deg,#B85550,#8A3530)','linear-gradient(140deg,#8CA08A,#6A8068)'];
 const ACC_ICONS={現金:'💵',銀行:'🏦',電子錢包:'📱',悠遊卡:'🎫',其他:'💰'};
@@ -133,7 +140,7 @@ let S={
   petty:{budget:5000}, fund:{balance:0},
   tabNames:{petty:'零用金',fund:'私房錢'},
   categories:[...CAT_DEF], customCats:[],
-  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三']
+  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手']
 };
 let viewDate=new Date(), tab='today', curC='y', chartPer='month';
 let AF={type:'exp',cat:'飲食',incCat:'薪資',date:'',method:'現金',cardId:null,accId:null,inst:false,periods:3,_a:'',_d:'',editingId:null};
@@ -146,7 +153,6 @@ const fmtD=ts=>new Date(ts).toLocaleDateString('zh-TW',{month:'numeric',day:'num
 const fmtT=ts=>new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
 const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const dateToTs=str=>{const[y,m,d]=str.split('-').map(Number);const n=new Date();return new Date(y,m-1,d,n.getHours(),n.getMinutes()).getTime()};
-const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const sameDay=(ts,ref)=>new Date(ts).toDateString()===ref.toDateString();
 const personal=e=>!e.isFund&&e.method!=='零用金';
 const curPer=(d,t)=>Math.min(t,Math.max(1,Math.floor((Date.now()-d)/(1000*60*60*24*30))+1));
@@ -154,6 +160,7 @@ const allCats=()=>[...S.categories,...S.customCats.map(c=>c.name)];
 const catIcon=c=>CAT_ICONS[c]||'📌';
 const catCol=c=>{if(CAT_COL[c])return CAT_COL[c];const x=S.customCats.find(x=>x.name===c);return x?x.color:'#9A9298'};
 const fmtDateDisp=str=>{if(!str||str===todayStr())return'今天';const[y,m,d]=str.split('-');return str.slice(0,4)===todayStr().slice(0,4)?parseInt(m)+'月'+parseInt(d)+'日':y+'/'+parseInt(m)+'/'+parseInt(d)};
+const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const accBal=aid=>{const a=S.accounts.find(x=>x.id===aid);if(!a)return 0;let b=a.initBal||0;S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>b+=i.amount);S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>b-=e.amount);S.transfers.filter(t=>t.toId===aid).forEach(t=>b+=t.amount);S.transfers.filter(t=>t.fromId===aid).forEach(t=>b-=t.amount);return b};
 const totalAssets=()=>S.accounts.reduce((s,a)=>s+accBal(a.id),0);
 const accIcon=a=>ACC_ICONS[a.type]||'💰';
@@ -162,9 +169,8 @@ const accCol=a=>ACC_COLS[a.type]||'#9A9298';
 // ─── STORAGE ────────────────────────────────────────────────────────
 function load(){
   try{const d=localStorage.getItem('Berich_V10');if(d)Object.assign(S,JSON.parse(d));
-    if(!S.categories)S.categories=[...CAT_DEF];
-    if(!S.customCats)S.customCats=[];
-    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三'];
+    if(!S.categories)S.categories=[...CAT_DEF];if(!S.customCats)S.customCats=[];
+    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手'];
     if(!S.petty)S.petty={budget:5000};if(!S.fund)S.fund={balance:0};
     if(!S.incomes)S.incomes=[];if(!S.cards)S.cards=[];
     if(!S.accounts||!S.accounts.length)S.accounts=[{id:'acc-cash',name:'現金',type:'現金',initBal:0}];
@@ -172,10 +178,9 @@ function load(){
     if(!S.tabNames)S.tabNames={petty:'零用金',fund:'私房錢'};
     if(!S.tabNames.petty)S.tabNames.petty='零用金';
     if(!S.tabNames.fund)S.tabNames.fund='私房錢';
-    if(!S.categories.includes('自訂一') && !S.categories.some(c=>c.includes('自訂'))) S.categories.push('自訂一','自訂二','自訂三');
-    if(!S.incomeCategories.includes('收自訂一') && !S.incomeCategories.some(c=>c.includes('收自訂'))) S.incomeCategories.push('收自訂一','收自訂二','收自訂三');
   }catch(e){}
   checkRecurring();render();
+  initPWAIcon();
 }
 const save=()=>{try{localStorage.setItem('Berich_V10',JSON.stringify(S));}catch(e){}};
 
@@ -269,8 +274,18 @@ function updateTabLabels(){
   const tf=document.getElementById('tab-fund');if(tf)tf.textContent=S.tabNames.fund||'私房錢';
   const fl=document.getElementById('fund-name-lbl');if(fl)fl.textContent=S.tabNames.fund||'私房錢';
 }
+let _rdTimer=null,_rdInterval=null;
+function rdStart(n){
+  changeDate(n);
+  _rdTimer=setTimeout(()=>{_rdInterval=setInterval(()=>changeDate(n),120);},500);
+}
+function rdStop(){
+  if(_rdTimer){clearTimeout(_rdTimer);_rdTimer=null;}
+  if(_rdInterval){clearInterval(_rdInterval);_rdInterval=null;}
+}
+function goToday(){viewDate=new Date();render();}
 
-// ─── EDIT LONG PRESS ────────────────────────────────────────────────
+// ─── LONG PRESS TO EDIT ENTRIES ──────────────────────────────────────
 let _editTimer=null;
 function editLp(id,isInc){editLpEnd();_editTimer=setTimeout(()=>{_editTimer=null;openEdit(id,isInc);},600);}
 function editLpEnd(){if(_editTimer){clearTimeout(_editTimer);_editTimer=null;}}
@@ -286,30 +301,21 @@ function openEdit(id,isInc){
   renderAddModal();
 }
 
-let _rdTimer=null,_rdInterval=null;
-function rdStart(n){
-  changeDate(n);
-  _rdTimer=setTimeout(()=>{_rdInterval=setInterval(()=>changeDate(n),120);},500);
-}
-function rdStop(){
-  if(_rdTimer){clearTimeout(_rdTimer);_rdTimer=null;}
-  if(_rdInterval){clearInterval(_rdInterval);_rdInterval=null;}
-}
-function goToday(){viewDate=new Date();render();}
-
 // ─── DATE PILL LONG PRESS → CALENDAR ────────────────────────────────
 let _dlpTimer=null;
 function dateLpStart(){
   _dlpTimer=setTimeout(()=>{
     _dlpTimer=null;
+    // Open calendar centred on current viewDate
     const[sy,sm]=[viewDate.getFullYear(),viewDate.getMonth()+1];
     calView={y:sy,m:sm};
+    // Override selDay to update viewDate instead of AF.date
     _calMode='view';
     drawCal();
   },500);
 }
 function dateLpEnd(){if(_dlpTimer){clearTimeout(_dlpTimer);_dlpTimer=null;}}
-let _calMode='add';
+let _calMode='add'; // 'add' | 'view'
 
 // ─── ENTRY CARD ─────────────────────────────────────────────────────
 function eiCard(e){
@@ -328,7 +334,7 @@ function eiCard(e){
   let ibar='';
   if(!isInc&&e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));
     ibar='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';}
-  const lpProps=`onmousedown="editLp('${e.id}',${isInc})" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',${isInc})" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
+  const lpProps='onmousedown="editLp(\''+e.id+'\','+isInc+')" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp(\''+e.id+'\','+isInc+')" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"';
   return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:'+bg+'">'+ico+'</div><div class="en"><div class="ename">'+(e.desc||'消費')+'</div><div class="emeta">'+ctag+cardtag+itag+atag+'<span style="color:var(--textl)">'+fmtT(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:700;color:'+(isInc?'var(--green)':col)+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();'+delfn+'">✕</button></div></div>'+ibar+'</div>';
 }
 
@@ -343,13 +349,13 @@ function rToday(){
   const isToday=viewDate.toDateString()===new Date().toDateString();
   const all=[...exps.map(e=>({...e,_t:'exp'})),...incs.map(i=>({...i,_t:'inc'}))].sort((a,b)=>b.date-a.date);
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">'+
-    '<button onmousedown="rdStart(-1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(-1)" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">&#10094; 前一天</button>'+
+    '<button onmousedown="rdStart(-1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(-1);event.preventDefault()" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">&#10094; 前一天</button>'+
     '<div id="date-pill" style="flex:1;text-align:center;padding:9px 10px;background:'+(isToday?'var(--maple-ll)':'var(--surf)')+';border:.5px solid '+(isToday?'var(--maple-l)':'var(--bdr)')+';border-radius:20px;cursor:pointer;user-select:none;-webkit-user-select:none"'+
       ' onmousedown="dateLpStart()" onmouseup="dateLpEnd()" onmouseleave="dateLpEnd()"'+
-      ' ontouchstart="dateLpStart()" ontouchend="dateLpEnd()" ontouchmove="dateLpEnd()">'+
+      ' ontouchstart="dateLpStart();event.preventDefault()" ontouchend="dateLpEnd()" ontouchmove="dateLpEnd()">'+
       '<div style="font-size:14px;font-weight:700;color:'+(isToday?'var(--maple-d)':'var(--text)')+'">'+lbl+'</div>'+
     '</div>'+
-    '<button onmousedown="rdStart(1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(1)" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">後一天 &#10095;</button>'+
+    '<button onmousedown="rdStart(1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(1);event.preventDefault()" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">後一天 &#10095;</button>'+
   '</div>'+
   '<div class="row2"><div class="sc" style="border-left:3px solid var(--maple)"><div class="sl">個人支出</div><div class="sv" style="color:var(--maple)">'+fmt(tE)+'</div></div><div class="sc" style="border-left:3px solid var(--green)"><div class="sl">個人收入</div><div class="sv" style="color:var(--green)">'+fmt(tI)+'</div></div></div>'+
   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px"><div style="background:var(--yellow-ll);border-radius:var(--r);padding:9px 11px;border:.5px solid var(--yellow-l)"><div style="font-size:10px;color:var(--yellow);margin-bottom:2px">💵 現金</div><div style="font-size:14px;font-weight:600;color:var(--text)">'+fmt(cE)+'</div></div><div style="background:var(--navy-ll);border-radius:var(--r);padding:9px 11px;border:.5px solid var(--navy-l)"><div style="font-size:10px;color:var(--navy);margin-bottom:2px">💳 刷卡</div><div style="font-size:14px;font-weight:600;color:var(--text)">'+fmt(kE)+'</div></div></div>'+
@@ -375,12 +381,14 @@ function rCards(){
         '<div><div style="font-size:9px;opacity:.65;margin-bottom:2px">繳費日</div><div style="font-size:12px;font-weight:600">每月 '+(card.dueDate||'?')+' 日</div></div>'+
       '</div></div>';
     if(exps.length){
-      h+='<div class="row2"><div class="sc" style="border-top:2.5px solid var(--navy)"><div class="sl">累計消費</div><div class="sv" style="color:var(--navy)">'+fmt(tot)+'</div></div><div class="sc" style="border-top:2.5px solid var(--plum)"><div class="sl">分期每月合計</div><div class="sv" style="color:var(--plum)">'+(instMo>0?fmt(instMo):'—')+'</div></div></div>';
+      const payments=S.expenses.filter(e=>e.cardPayment===card.id);
+    const paidTotal=payments.reduce((s,e)=>s+e.amount,0);
+    h+='<div class="row2"><div class="sc" style="border-top:2.5px solid var(--navy)"><div class="sl">累計消費</div><div class="sv" style="color:var(--navy)">'+fmt(tot)+'</div></div><div class="sc" style="border-top:2.5px solid var(--green)"><div class="sl">已繳金額</div><div class="sv" style="color:var(--green)">'+fmt(paidTotal)+'</div></div></div>'+
+    (tot>paidTotal?'<div style="background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);padding:9px 13px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--maple-d);font-weight:600">⚠ 未繳餘額</span><span style="font-size:15px;font-weight:700;color:var(--maple)">'+fmt(tot-paidTotal)+'</span></div>':'<div style="background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);padding:9px 13px;margin-bottom:10px;text-align:center;font-size:12px;color:var(--green);font-weight:600">✓ 已全額繳清</div>');
       exps.slice().reverse().forEach(e=>{
         const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
         let ib='';if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';}
-        const lpProps=`onmousedown="editLp('${e.id}',false)" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',false)" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
-        h+='<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:var(--navy-ll)">💳</div><div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\')">✕</button></div></div>'+ib+'</div>';
+        h+='<div class="ei"><div class="eirow"><div class="eico" style="background:var(--navy-ll)">💳</div><div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="delExp(\''+e.id+'\')">✕</button></div></div>'+ib+'</div>';
       });
     }else h+='<div style="font-size:12px;color:var(--textl);text-align:center;padding:8px 0 12px">還沒有消費紀錄</div>';
     if(i<S.cards.length-1)h+='<div style="height:.5px;background:var(--bdr);margin:8px 0 16px"></div>';
@@ -411,22 +419,12 @@ function rAccounts(){
 // ─── PETTY TAB ──────────────────────────────────────────────────────
 function rPetty(){
   const exps=S.expenses.filter(e=>e.method==='零用金');
-  const incs=S.incomes.filter(i=>i.method==='零用金');
-  const tE=exps.reduce((s,e)=>s+e.amount,0);
-  const tI=incs.reduce((s,i)=>s+i.amount,0);
-  const netExp = tE - tI;
-  const rem=(S.petty.budget||5000)-netExp;
-  const pct=Math.max(0,Math.min(100,netExp/(S.petty.budget||5000)*100));
-  const all=[...exps.map(e=>({...e,_t:'exp'})),...incs.map(i=>({...i,_t:'inc'}))].sort((a,b)=>b.date-a.date);
-  
-  return '<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">'+(S.tabNames.petty||'零用金')+'餘額</div><div class="sv" style="color:var(--bean)">'+fmt(rem)+'</div></div><div style="text-align:right"><div class="sl">淨支出</div><div class="sv" style="color:var(--maple)">'+fmt(netExp)+'</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--bean);width:'+pct+'%;border-radius:3px;transition:width .4s"></div></div></div>'+
-  '<div style="display:flex;gap:7px;margin-bottom:14px"><button class="ab" style="margin:0;flex:1;border-color:var(--bean);color:var(--bean)" onclick="showM(\'addPetty\')">＋ 新增紀錄</button><button class="ab" style="margin:0;flex:1" onclick="showM(\'setPetty\')">設定額度</button></div>'+
-  '<div class="sec">'+(S.tabNames.petty||'零用金')+'明細</div>'+(!all.length?'<div class="empty">還沒有零用金記錄</div>':all.map(e=>{
-    const isInc = e._t==='inc';
-    const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
-    const lpProps=`onmousedown="editLp('${e.id}',${isInc})" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',${isInc})" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
-    const delfn = isInc ? 'delInc' : 'delExp';
-    return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:'+(isInc?'var(--green-ll)':'var(--bean-ll)')+'">'+(isInc?'💹':'🏢')+'</div><div class="en"><div class="ename">'+(e.desc||(isInc?'零用金收入':'零用金支出'))+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:'+(isInc?'var(--green)':'var(--bean)')+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();'+delfn+'(\''+e.id+'\')">✕</button></div></div></div>';
+  const tot=exps.reduce((s,e)=>s+e.amount,0),rem=(S.petty.budget||5000)-tot;
+  const pct=Math.max(0,Math.min(100,tot/(S.petty.budget||5000)*100));
+  return '<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">'+(S.tabNames.petty||'零用金')+'餘額</div><div class="sv" style="color:var(--bean)">'+fmt(rem)+'</div></div><div style="text-align:right"><div class="sl">已使用</div><div class="sv" style="color:var(--maple)">'+fmt(tot)+'</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--bean);width:'+pct+'%;border-radius:3px;transition:width .4s"></div></div></div>'+
+  '<div style="display:flex;gap:7px;margin-bottom:14px"><button class="ab" style="margin:0;flex:1;border-color:var(--bean);color:var(--bean)" onclick="showM(\'addPetty\')">＋ 新增支出</button><button class="ab" style="margin:0;flex:1" onclick="showM(\'setPetty\')">設定額度</button></div>'+
+  '<div class="sec">'+(S.tabNames.petty||'零用金')+'明細</div>'+(!exps.length?'<div class="empty">還沒有零用金記錄</div>':exps.slice().reverse().map(e=>{const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
+    return '<div class="ei"><div class="eirow"><div class="eico" style="background:var(--bean-ll)">🏢</div><div class="en"><div class="ename">'+(e.desc||'零用金支出')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--bean)">-'+fmt(e.amount)+'</div><button class="db" onclick="delExp(\''+e.id+'\')">✕</button></div></div></div>';
   }).join(''));
 }
 
@@ -600,7 +598,6 @@ function setQP(p){AF.periods=p;const el=document.getElementById('mperd');if(el)e
 
 function renderAddModal(){
   const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc');if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;
-  if(AF.type==='inc' && AF.method==='刷卡') AF.method='現金';
   if(!AF.date)AF.date=todayStr();
   const acc=FABCOL[curC],isInc=AF.type==='inc',isTd=AF.date===todayStr();
   const MC={現金:'var(--yellow)',刷卡:'var(--navy)',零用金:'var(--bean)'};
@@ -614,11 +611,38 @@ function renderAddModal(){
     h+='<div class="mtitle" style="color:var(--maple)">編輯'+(isInc?'收入':'支出')+'紀錄</div>';
   }else{
     h+='<div style="display:flex;gap:0;background:var(--surf);border-radius:var(--r);padding:3px;margin-bottom:14px">'+
-      '<button class="mb'+(isInc?'':' on')+'" style="'+(isInc?'':'background:var(--maple);color:#fff;border-color:transparent')+'" onclick="AF.type=\'exp\';renderAddModal()">支出</button>'+
+      '<button class="mb'+(AF.type==='exp'?' on':'')+'" style="'+(AF.type==='exp'?'background:var(--maple);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'exp\';renderAddModal()">支出</button>'+
       '<button class="mb'+(isInc?' on':'')+'" style="'+(isInc?'background:var(--green);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'inc\';AF.method=\'現金\';renderAddModal()">收入</button>'+
+      '<button class="mb'+(AF.type==='xfer'?' on':'')+'" style="'+(AF.type==='xfer'?'background:var(--navy);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'xfer\';renderAddModal()">轉帳</button>'+
     '</div>';
   }
-  
+
+  // ── 轉帳（帳戶 → 信用卡繳費）─────────────────────
+  if(AF.type==='xfer'){
+    h+='<div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="'+AF._a+'" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--navy)"></div>'+
+    '<div class="fg"><label class="fl">日期</label>'+
+      '<div onclick="openCal()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf);border:1px solid '+(isTd?'var(--green-l)':'var(--maple-l)')+';border-radius:var(--r);cursor:pointer">'+
+        '<span style="font-size:14px;font-weight:700;color:'+(isTd?'var(--green)':'var(--maple)')+'">'+fmtDateDisp(AF.date)+'</span>'+
+        '<span style="font-size:12px;color:var(--textl);background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:3px 10px">點此換日期</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="fg"><label class="fl">從哪個帳戶轉出</label>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">'+
+        S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:8px 14px;font-size:13px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
+      '</div>'+
+    '</div>'+
+    '<div class="fg"><label class="fl">繳哪張信用卡</label>'+
+    (S.cards.length===0?
+      '<div style="font-size:12px;color:var(--textl);padding:10px;background:var(--navy-ll);border-radius:var(--r);text-align:center">請先在信用卡頁籤新增卡片</div>':
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">'+
+        S.cards.map(c=>{const on=AF.cardId===c.id;return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:var(--navy);color:#fff;border-color:transparent':'')+';flex:none;padding:8px 14px;font-size:13px" onclick="AF.cardId=\''+c.id+'\';renderAddModal()">💳 '+c.name+'</button>';}).join('')+
+      '</div>')+
+    '</div>'+
+    '<div class="fg"><label class="fl">備註（可略）</label><input class="fi" id="mdesc" placeholder="4月帳單、旅遊刷卡..." value="'+AF._d+'"></div>'+
+    '<button class="sub" style="background:var(--navy)" onclick="subAdd()">確認繳費</button>';
+    document.getElementById('mc').innerHTML=h;
+    return;
+  }
   h+='<div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="'+AF._a+'" oninput="updInst()" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--maple)"></div>'+
   '<div class="fg"><label class="fl">日期</label>'+
     '<div onclick="openCal()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf);border:1px solid '+(isTd?'var(--green-l)':'var(--maple-l)')+';border-radius:var(--r);cursor:pointer">'+
@@ -630,31 +654,32 @@ function renderAddModal(){
   '<div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label class="fl" style="margin:0">分類</label><span style="font-size:10px;color:var(--textl)">久按可改名</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
       cats.map(c=>{const on=selCat===c,cc=catCol(c);const clickFn=isInc?"AF.incCat='"+c+"'":'AF.cat=\''+c+'\'';
-        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+';user-select:none;-webkit-user-select:none" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+')" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
+        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+';user-select:none;-webkit-user-select:none" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+');event.preventDefault()" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
       }).join('')+
     '</div>'+
   '</div>';
 
-  h+='<div class="fg"><label class="fl">帳戶（可略）</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+
-    '<button class="mb'+(!AF.accId?' on':'')+'" style="'+(!AF.accId?'background:var(--textl);color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=null;renderAddModal()">不指定</button>'+
-    S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
-  '</div></div>';
-
-  h+='<div class="fg"><label class="fl">'+(isInc?'入帳方式':'付款方式')+'</label><div class="mbtns">'+
-    (isInc?['現金','零用金']:['現金','刷卡','零用金']).map(m=>{const on=AF.method===m;return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+(isInc&&m==='現金'?'var(--green)':MC[m])+';color:#fff;border-color:transparent':'')+'" onclick="AF.method=\''+m+'\';renderAddModal()">'+MI[m]+' '+m+'</button>';}).join('')+
-  '</div></div>';
-
-  if(!isInc && AF.method==='刷卡'){
-    h+='<div class="fg"><label class="fl" style="color:var(--navy)">選擇信用卡</label>';
-    if(!S.cards.length)h+='<div style="font-size:12px;color:var(--textl);padding:8px;background:var(--navy-ll);border-radius:var(--r);text-align:center">請先在信用卡頁籤新增卡片</div>';
-    else{h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';S.cards.forEach(c=>{const on=AF.cardId===c.id;h+='<button class="mb'+(on?' on':'')+'" style="'+(on?'background:var(--navy);color:#fff;border-color:transparent':'')+';flex:none;padding:8px 14px;font-size:12px" onclick="AF.cardId=\''+c.id+'\';renderAddModal()">'+c.name+'</button>';});h+='</div>';}
-    h+='</div><div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(AF.inst?'11':'0')+'px"><label class="fl" style="margin:0">分期付款</label><button class="togbtn" onclick="AF.inst=!AF.inst;renderAddModal()" style="background:'+(AF.inst?'var(--navy)':'transparent')+';border-color:'+(AF.inst?'var(--navy)':'var(--bdr)')+';color:'+(AF.inst?'#fff':'var(--textl)')+'">'+(AF.inst?'✓ 已開啟':'關閉')+'</button></div>';
-    if(AF.inst){h+='<div style="display:flex;gap:6px;margin-bottom:8px">'+ [3,6,12,24].map(p=>{const on=AF.periods===p;return '<button class="mb qper'+(on?' on':'')+'" data-p="'+p+'" style="'+(on?'background:var(--navy);color:#fff;border-color:transparent':'')+';padding:7px 2px;font-size:12px" onclick="setQP('+p+')">'+p+'期</button>';}).join('')+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:12px;color:var(--textl);white-space:nowrap;flex-shrink:0">自訂期數</span><input class="fi" id="mperd" type="number" min="1" max="999" value="'+AF.periods+'" style="padding:8px;font-size:14px;text-align:center;margin:0;flex:1" oninput="updInst()"><span style="font-size:13px;color:var(--textl)">期</span></div>'+
-      '<div id="inst-preview" class="inst-info" style="background:var(--navy-ll);'+(mo>0?'':'display:none')+'">'+(mo>0?'每期約 <b style="color:var(--navy)">'+fmt(mo)+'</b> · 共 '+AF.periods+' 期 · 總計 '+fmt(mo*AF.periods):'')+'</div>';}
-    h+='</div>';
+  if(!isInc){
+    // Account selection
+    h+='<div class="fg"><label class="fl">帳戶（可略）</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+      '<button class="mb'+(!AF.accId?' on':'')+'" style="'+(!AF.accId?'background:var(--textl);color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=null;renderAddModal()">不指定</button>'+
+      S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
+    '</div></div>';
+    // Method
+    h+='<div class="fg"><label class="fl">付款方式</label><div class="mbtns">'+
+      ['現金','刷卡','零用金'].map(m=>{const on=AF.method===m;return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+MC[m]+';color:#fff;border-color:transparent':'')+'" onclick="AF.method=\''+m+'\';renderAddModal()">'+MI[m]+' '+m+'</button>';}).join('')+
+    '</div></div>';
+    if(AF.method==='刷卡'){
+      h+='<div class="fg"><label class="fl" style="color:var(--navy)">選擇信用卡</label>';
+      if(!S.cards.length)h+='<div style="font-size:12px;color:var(--textl);padding:8px;background:var(--navy-ll);border-radius:var(--r);text-align:center">請先在信用卡頁籤新增卡片</div>';
+      else{h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';S.cards.forEach(c=>{const on=AF.cardId===c.id;h+='<button class="mb'+(on?' on':'')+'" style="'+(on?'background:var(--navy);color:#fff;border-color:transparent':'')+';flex:none;padding:8px 14px;font-size:12px" onclick="AF.cardId=\''+c.id+'\';renderAddModal()">'+c.name+'</button>';});h+='</div>';}
+      h+='</div><div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(AF.inst?'11':'0')+'px"><label class="fl" style="margin:0">分期付款</label><button class="togbtn" onclick="AF.inst=!AF.inst;renderAddModal()" style="background:'+(AF.inst?'var(--navy)':'transparent')+';border-color:'+(AF.inst?'var(--navy)':'var(--bdr)')+';color:'+(AF.inst?'#fff':'var(--textl)')+'">'+(AF.inst?'✓ 已開啟':'關閉')+'</button></div>';
+      if(AF.inst){h+='<div style="display:flex;gap:6px;margin-bottom:8px">'+ [3,6,12,24].map(p=>{const on=AF.periods===p;return '<button class="mb qper'+(on?' on':'')+'" data-p="'+p+'" style="'+(on?'background:var(--navy);color:#fff;border-color:transparent':'')+';padding:7px 2px;font-size:12px" onclick="setQP('+p+')">'+p+'期</button>';}).join('')+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:12px;color:var(--textl);white-space:nowrap;flex-shrink:0">自訂期數</span><input class="fi" id="mperd" type="number" min="1" max="999" value="'+AF.periods+'" style="padding:8px;font-size:14px;text-align:center;margin:0;flex:1" oninput="updInst()"><span style="font-size:13px;color:var(--textl)">期</span></div>'+
+        '<div id="inst-preview" class="inst-info" style="background:var(--navy-ll);'+(mo>0?'':'display:none')+'">'+(mo>0?'每期約 <b style="color:var(--navy)">'+fmt(mo)+'</b> · 共 '+AF.periods+' 期 · 總計 '+fmt(mo*AF.periods):'')+'</div>';}
+      h+='</div>';
+    }
   }
-  
   h+='<button class="sub" style="background:'+(isInc?'var(--green)':acc)+'" onclick="subAdd()">'+(AF.editingId?'儲存修改':'記帳')+'</button>';
   document.getElementById('mc').innerHTML=h;
 }
@@ -662,7 +687,6 @@ function renderAddModal(){
 // ─── MODALS ─────────────────────────────────────────────────────────
 function showM(type){
   const mc=document.getElementById('mc'),acc=FABCOL[curC];
-  mc.innerHTML=''; // <-- 防呆：打開新視窗時，強制清空舊資料，避免殘留
   if(type==='add'){
     AF.editingId=null;
     AF.type='exp';AF.cat=allCats()[0]||CAT_DEF[0];AF.incCat=S.incomeCategories[0]||'薪資';
@@ -713,8 +737,7 @@ function showM(type){
       '<div class="fg"><label class="fl">備註（可略）</label><input class="fi" id="xnote" placeholder="備註..."></div>'+
       '<button class="sub" style="background:var(--navy)" onclick="subXfer()">確認轉帳</button>';
   }else if(type==='addPetty'){
-    mc.innerHTML='<div class="mtitle">新增零用金紀錄</div>'+
-      '<div class="fg"><label class="fl">類型</label><div style="display:flex;gap:8px"><label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);cursor:pointer"><input type="radio" name="ptype" value="exp" checked> <span style="font-size:13px;font-weight:600;color:var(--maple)">支出</span></label><label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);cursor:pointer"><input type="radio" name="ptype" value="inc"> <span style="font-size:13px;font-weight:600;color:var(--green)">收入</span></label></div></div>'+
+    mc.innerHTML='<div class="mtitle">新增零用金支出</div>'+
       '<div class="fg"><label class="fl">金額</label><input class="fi" id="mpa" type="number" placeholder="0" inputmode="decimal"></div>'+
       '<div class="fg"><label class="fl">描述（可略）</label><input class="fi" id="mpd" placeholder="描述..."></div>'+
       '<button class="sub" style="background:var(--bean)" onclick="subPetty()">記帳</button>';
@@ -763,24 +786,26 @@ function subAdd(){
   const amt=parseFloat(document.getElementById('mamt')?.value);if(!amt||amt<=0)return;
   const desc=document.getElementById('mdesc')?.value||'';
   const ts=dateToTs(AF.date||todayStr());
-  
+
+  // ── 信用卡繳費轉帳 ──────────────────────────────
+  if(AF.type==='xfer'){
+    if(!AF.accId){alert('請選擇轉出帳戶');return;}
+    if(!AF.cardId){alert('請選擇要繳費的信用卡');return;}
+    const card=S.cards.find(c=>c.id===AF.cardId);
+    const cardName=card?card.name:'信用卡';
+    S.transfers.push({id:uid(),date:ts,fromId:AF.accId,toId:'__card__'+AF.cardId,toCardId:AF.cardId,amount:amt,note:desc||'繳 '+cardName+' 帳單'});
+    S.expenses.push({id:uid(),date:ts,amount:amt,desc:desc||'繳 '+cardName+' 帳單',cat:'保險',method:'轉帳',accId:AF.accId,cardPayment:AF.cardId,isFund:false});
+    save();closeM();render();return;
+  }
   if(AF.editingId){
     if(AF.type==='inc'){
-      let item=S.incomes.find(i=>i.id===AF.editingId);
-      if(item){
-        if(fmtDateYMD(item.date)!==AF.date)item.date=ts;
-        item.amount=amt;item.desc=desc;item.cat=AF.incCat;
-        item.method=AF.method;
-        item.accId=AF.method!=='零用金'?AF.accId:null;
-      }
+      const item=S.incomes.find(i=>i.id===AF.editingId);
+      if(item){item.date=ts;item.amount=amt;item.desc=desc;item.cat=AF.incCat;item.method=AF.method;item.accId=AF.method!=='零用金'?AF.accId:null;}
     }else{
-      let item=S.expenses.find(e=>e.id===AF.editingId);
-      if(item){
-        if(fmtDateYMD(item.date)!==AF.date)item.date=ts;
-        item.amount=amt;item.desc=desc;item.cat=AF.cat;item.method=AF.method;item.accId=AF.method!=='零用金'?AF.accId:null;
+      const item=S.expenses.find(e=>e.id===AF.editingId);
+      if(item){item.date=ts;item.amount=amt;item.desc=desc;item.cat=AF.cat;item.method=AF.method;item.accId=AF.method!=='零用金'?AF.accId:null;
         if(AF.method==='刷卡'){item.cardId=AF.cardId;if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;item.inst={on:true,periods:p,monthly:Math.ceil(amt/p)};}else delete item.inst;}
-        else{delete item.cardId;delete item.inst;}
-      }
+        else{delete item.cardId;delete item.inst;}}
     }
     AF.editingId=null;
   }else{
@@ -802,14 +827,7 @@ function subXfer(){
   S.transfers.push({id:uid(),date:Date.now(),fromId,toId,amount:amt,note});
   save();closeM();if(tab==='accounts')renderBody();else render();
 }
-function subPetty(){
-  const a=parseFloat(document.getElementById('mpa')?.value);if(!a||a<=0)return;
-  const t=document.querySelector('input[name="ptype"]:checked')?.value||'exp';
-  const desc=document.getElementById('mpd')?.value||'';
-  if(t==='inc') S.incomes.push({id:uid(),date:Date.now(),amount:a,desc,method:'零用金',cat:'外快',accId:null,isFund:false});
-  else S.expenses.push({id:uid(),date:Date.now(),amount:a,desc,method:'零用金',cat:'公司',accId:null,isFund:false});
-  save();closeM();render();
-}
+function subPetty(){const a=parseFloat(document.getElementById('mpa')?.value);if(!a||a<=0)return;S.expenses.push({id:uid(),date:Date.now(),amount:a,desc:document.getElementById('mpd')?.value||'',method:'零用金',cat:'公司',isFund:false});save();closeM();render();}
 function subPettyB(){const v=parseFloat(document.getElementById('mpb')?.value);if(v>0){S.petty.budget=v;save();closeM();render();}}
 function subFund(type){
   const a=parseFloat(document.getElementById('mfa')?.value);if(!a||a<=0)return;
@@ -825,6 +843,48 @@ function delFundExp(id){const e=S.expenses.find(x=>x.id===id);if(e){S.fund.balan
 function delFundInc(id){const i=S.incomes.find(x=>x.id===id);if(i){S.fund.balance=Math.max(0,S.fund.balance-i.amount);S.incomes=S.incomes.filter(x=>x.id!==id);}save();render();}
 function delCard(id){S.cards=S.cards.filter(c=>c.id!==id);save();render();}
 function delAcc(id){if(S.accounts.length<=1){alert('至少保留一個帳戶');return;}S.accounts=S.accounts.filter(a=>a.id!==id);S.transfers=S.transfers.filter(t=>t.fromId!==id&&t.toId!==id);save();if(tab==='accounts')renderBody();else render();}
+
+// ─── PWA ICON (canvas-generated, no external files needed) ──────────
+function initPWAIcon(){
+  const S2=192,R=42;
+  const cv=document.createElement('canvas');cv.width=cv.height=S2;
+  const cx=cv.getContext('2d');
+  // Rounded rect background
+  cx.beginPath();cx.moveTo(R,0);cx.lineTo(S2-R,0);cx.arcTo(S2,0,S2,R,R);
+  cx.lineTo(S2,S2-R);cx.arcTo(S2,S2,S2-R,S2,R);cx.lineTo(R,S2);cx.arcTo(0,S2,0,S2-R,R);
+  cx.lineTo(0,R);cx.arcTo(0,0,R,0,R);cx.closePath();
+  cx.fillStyle='#B85550';cx.fill();
+  // Big circle (white)
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.fillStyle='rgba(255,255,255,0.95)';cx.fill();
+  // Ring on big circle
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.strokeStyle='rgba(184,85,80,0.25)';cx.lineWidth=5;cx.stroke();
+  // "B" letter
+  cx.fillStyle='#8A3530';
+  cx.font='900 52px Impact,Arial Black,sans-serif';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('B',96,76);
+  // Neck
+  cx.fillStyle='rgba(255,255,255,0.88)';
+  cx.beginPath();cx.roundRect(89,121,14,18,4);cx.fill();
+  // Small circle (plum)
+  cx.beginPath();cx.arc(96,158,26,0,Math.PI*2);
+  cx.fillStyle='#7A6C9A';cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.9)';
+  cx.font='bold 11px -apple-system,PingFang TC,sans-serif';
+  cx.fillText('私房錢',96,158);
+
+  const url=cv.toDataURL('image/png');
+  document.getElementById('pwa-icon').href=url;
+
+  // Dynamic manifest so Chrome/Android also gets icon
+  const mf={name:'Berich 記帳',short_name:'Berich',start_url:location.href,
+    display:'standalone',background_color:'#F4EBE8',theme_color:'#B85550',
+    icons:[{src:url,sizes:'192x192',type:'image/png',purpose:'any maskable'}]};
+  const blob=new Blob([JSON.stringify(mf)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
+}
 
 load();
 </script>
