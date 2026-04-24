@@ -115,8 +115,9 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
   </div>
   <button id="fab" onclick="showM('add')" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;width:56px;height:56px;border-radius:50%;border:none;font-size:28px;box-shadow:0 4px 16px rgba(107,143,114,.45);z-index:10;cursor:pointer">+</button>
   <div id="mo" onclick="closeOnBg(event)" style="display:none;position:absolute;inset:0;background:rgba(30,22,20,.35);z-index:50;align-items:flex-end">
-    <div id="mpanel" style="background:var(--card);border-radius:22px 22px 0 0;padding:12px 18px 36px;width:100%;max-height:93%;overflow-y:auto">
+    <div id="mpanel" style="background:var(--card);border-radius:22px 22px 0 0;padding:12px 18px 36px;width:100%;max-height:93%;overflow-y:auto;position:relative">
       <div style="width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px"></div>
+      <button onclick="closeM()" style="position:absolute;top:12px;right:16px;background:var(--surf);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--textm);cursor:pointer;z-index:10">✕</button>
       <div id="mc"></div>
     </div>
   </div>
@@ -526,7 +527,10 @@ function subRec(){
 function delRec(id){S.recurring=S.recurring.filter(x=>x.id!==id);save();showRecurring();}
 
 // ─── LONG PRESS RENAME ──────────────────────────────────────────────
-function lpStart(c,isInc){lpEnd();lpTimer=setTimeout(()=>{lpTimer=null;showRename(c,isInc);},600);}
+function lpStart(c,isInc){
+  lpEnd();
+  lpTimer=setTimeout(()=>{lpTimer=null;showRename(c,isInc);},700);
+}
 function lpEnd(){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}}
 function showRename(old,isInc){
   const aEl=document.getElementById('mamt'),dEl=document.getElementById('mdesc');if(aEl)AF._a=aEl.value;if(dEl)AF._d=dEl.value;
@@ -654,7 +658,7 @@ function renderAddModal(){
   '<div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label class="fl" style="margin:0">分類</label><span style="font-size:10px;color:var(--textl)">久按可改名</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
       cats.map(c=>{const on=selCat===c,cc=catCol(c);const clickFn=isInc?"AF.incCat='"+c+"'":'AF.cat=\''+c+'\'';
-        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+';user-select:none;-webkit-user-select:none" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+');event.preventDefault()" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
+        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+'" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()">'+catIcon(c)+' '+c+'</button>';
       }).join('')+
     '</div>'+
   '</div>';
