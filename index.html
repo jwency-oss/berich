@@ -135,7 +135,7 @@ let S={
   incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三']
 };
 let viewDate=new Date(), tab='today', curC='y', chartPer='month';
-let AF={type:'exp',cat:'飲食',incCat:'薪資',date:'',method:'現金',cardId:null,accId:null,inst:false,periods:3,_a:'',_d:''};
+let AF={type:'exp',cat:'飲食',incCat:'薪資',date:'',method:'現金',cardId:null,accId:null,inst:false,periods:3,_a:'',_d:'',editingId:null};
 let lpTimer=null, calView={y:0,m:0};
 
 // ─── UTILS ──────────────────────────────────────────────────────────
@@ -145,6 +145,7 @@ const fmtD=ts=>new Date(ts).toLocaleDateString('zh-TW',{month:'numeric',day:'num
 const fmtT=ts=>new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
 const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const dateToTs=str=>{const[y,m,d]=str.split('-').map(Number);const n=new Date();return new Date(y,m-1,d,n.getHours(),n.getMinutes()).getTime()};
+const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const sameDay=(ts,ref)=>new Date(ts).toDateString()===ref.toDateString();
 const personal=e=>!e.isFund&&e.method!=='零用金';
 const curPer=(d,t)=>Math.min(t,Math.max(1,Math.floor((Date.now()-d)/(1000*60*60*24*30))+1));
@@ -170,8 +171,6 @@ function load(){
     if(!S.tabNames)S.tabNames={petty:'零用金',fund:'私房錢'};
     if(!S.tabNames.petty)S.tabNames.petty='零用金';
     if(!S.tabNames.fund)S.tabNames.fund='私房錢';
-    
-    // 防呆補丁：如果舊用戶沒有這些自訂空位，自動補上且不覆蓋舊資料
     if(!S.categories.includes('自訂一') && !S.categories.some(c=>c.includes('自訂'))) S.categories.push('自訂一','自訂二','自訂三');
     if(!S.incomeCategories.includes('收自訂一') && !S.incomeCategories.some(c=>c.includes('收自訂'))) S.incomeCategories.push('收自訂一','收自訂二','收自訂三');
   }catch(e){}
@@ -269,6 +268,21 @@ function updateTabLabels(){
   const tf=document.getElementById('tab-fund');if(tf)tf.textContent=S.tabNames.fund||'私房錢';
   const fl=document.getElementById('fund-name-lbl');if(fl)fl.textContent=S.tabNames.fund||'私房錢';
 }
+
+// ─── EDIT LONG PRESS ────────────────────────────────────────────────
+let _editTimer=null;
+function editLp(id,isInc){editLpEnd();_editTimer=setTimeout(()=>{_editTimer=null;openEdit(id,isInc);},600);}
+function editLpEnd(){if(_editTimer){clearTimeout(_editTimer);_editTimer=null;}}
+function openEdit(id,isInc){
+  const item=isInc?S.incomes.find(x=>x.id===id):S.expenses.find(x=>x.id===id);
+  if(!item)return;
+  AF.editingId=id;AF.type=isInc?'inc':'exp';AF._a=item.amount;AF._d=item.desc||'';
+  AF.date=fmtDateYMD(item.date);AF.method=item.method||'現金';AF.accId=item.accId||null;
+  if(isInc)AF.incCat=item.cat;else AF.cat=item.cat;
+  if(!isInc){AF.cardId=item.cardId||null;if(item.inst&&item.inst.on){AF.inst=true;AF.periods=item.inst.periods;}else{AF.inst=false;AF.periods=3;}}
+  document.getElementById('mc').innerHTML='';document.getElementById('mo').style.display='flex';renderAddModal();
+}
+
 let _rdTimer=null,_rdInterval=null;
 function rdStart(n){
   changeDate(n);
@@ -285,16 +299,14 @@ let _dlpTimer=null;
 function dateLpStart(){
   _dlpTimer=setTimeout(()=>{
     _dlpTimer=null;
-    // Open calendar centred on current viewDate
     const[sy,sm]=[viewDate.getFullYear(),viewDate.getMonth()+1];
     calView={y:sy,m:sm};
-    // Override selDay to update viewDate instead of AF.date
     _calMode='view';
     drawCal();
   },500);
 }
 function dateLpEnd(){if(_dlpTimer){clearTimeout(_dlpTimer);_dlpTimer=null;}}
-let _calMode='add'; // 'add' | 'view'
+let _calMode='add';
 
 // ─── ENTRY CARD ─────────────────────────────────────────────────────
 function eiCard(e){
@@ -313,7 +325,8 @@ function eiCard(e){
   let ibar='';
   if(!isInc&&e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));
     ibar='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';}
-  return '<div class="ei"><div class="eirow"><div class="eico" style="background:'+bg+'">'+ico+'</div><div class="en"><div class="ename">'+(e.desc||'消費')+'</div><div class="emeta">'+ctag+cardtag+itag+atag+'<span style="color:var(--textl)">'+fmtT(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:700;color:'+(isInc?'var(--green)':col)+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="'+delfn+'">✕</button></div></div>'+ibar+'</div>';
+  const lpProps=`onmousedown="editLp('${e.id}',${isInc})" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',${isInc})" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
+  return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:'+bg+'">'+ico+'</div><div class="en"><div class="ename">'+(e.desc||'消費')+'</div><div class="emeta">'+ctag+cardtag+itag+atag+'<span style="color:var(--textl)">'+fmtT(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:700;color:'+(isInc?'var(--green)':col)+'">'+(isInc?'+':'-')+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();'+delfn+'">✕</button></div></div>'+ibar+'</div>';
 }
 
 // ─── TODAY TAB ──────────────────────────────────────────────────────
@@ -327,13 +340,13 @@ function rToday(){
   const isToday=viewDate.toDateString()===new Date().toDateString();
   const all=[...exps.map(e=>({...e,_t:'exp'})),...incs.map(i=>({...i,_t:'inc'}))].sort((a,b)=>b.date-a.date);
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">'+
-    '<button onmousedown="rdStart(-1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(-1);event.preventDefault()" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">&#10094; 前一天</button>'+
+    '<button onmousedown="rdStart(-1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(-1)" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">&#10094; 前一天</button>'+
     '<div id="date-pill" style="flex:1;text-align:center;padding:9px 10px;background:'+(isToday?'var(--maple-ll)':'var(--surf)')+';border:.5px solid '+(isToday?'var(--maple-l)':'var(--bdr)')+';border-radius:20px;cursor:pointer;user-select:none;-webkit-user-select:none"'+
       ' onmousedown="dateLpStart()" onmouseup="dateLpEnd()" onmouseleave="dateLpEnd()"'+
-      ' ontouchstart="dateLpStart();event.preventDefault()" ontouchend="dateLpEnd()" ontouchmove="dateLpEnd()">'+
+      ' ontouchstart="dateLpStart()" ontouchend="dateLpEnd()" ontouchmove="dateLpEnd()">'+
       '<div style="font-size:14px;font-weight:700;color:'+(isToday?'var(--maple-d)':'var(--text)')+'">'+lbl+'</div>'+
     '</div>'+
-    '<button onmousedown="rdStart(1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(1);event.preventDefault()" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">後一天 &#10095;</button>'+
+    '<button onmousedown="rdStart(1)" onmouseup="rdStop()" onmouseleave="rdStop()" ontouchstart="rdStart(1)" ontouchend="rdStop()" style="flex-shrink:0;padding:8px 14px;background:var(--card);border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:13px;color:var(--textl);font-family:inherit;user-select:none;-webkit-user-select:none">後一天 &#10095;</button>'+
   '</div>'+
   '<div class="row2"><div class="sc" style="border-left:3px solid var(--maple)"><div class="sl">個人支出</div><div class="sv" style="color:var(--maple)">'+fmt(tE)+'</div></div><div class="sc" style="border-left:3px solid var(--green)"><div class="sl">個人收入</div><div class="sv" style="color:var(--green)">'+fmt(tI)+'</div></div></div>'+
   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px"><div style="background:var(--yellow-ll);border-radius:var(--r);padding:9px 11px;border:.5px solid var(--yellow-l)"><div style="font-size:10px;color:var(--yellow);margin-bottom:2px">💵 現金</div><div style="font-size:14px;font-weight:600;color:var(--text)">'+fmt(cE)+'</div></div><div style="background:var(--navy-ll);border-radius:var(--r);padding:9px 11px;border:.5px solid var(--navy-l)"><div style="font-size:10px;color:var(--navy);margin-bottom:2px">💳 刷卡</div><div style="font-size:14px;font-weight:600;color:var(--text)">'+fmt(kE)+'</div></div></div>'+
@@ -363,7 +376,8 @@ function rCards(){
       exps.slice().reverse().forEach(e=>{
         const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
         let ib='';if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';}
-        h+='<div class="ei"><div class="eirow"><div class="eico" style="background:var(--navy-ll)">💳</div><div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="delExp(\''+e.id+'\')">✕</button></div></div>'+ib+'</div>';
+        const lpProps=`onmousedown="editLp('${e.id}',false)" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',false)" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
+        h+='<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:var(--navy-ll)">💳</div><div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\')">✕</button></div></div>'+ib+'</div>';
       });
     }else h+='<div style="font-size:12px;color:var(--textl);text-align:center;padding:8px 0 12px">還沒有消費紀錄</div>';
     if(i<S.cards.length-1)h+='<div style="height:.5px;background:var(--bdr);margin:8px 0 16px"></div>';
@@ -399,7 +413,8 @@ function rPetty(){
   return '<div class="sc" style="margin-bottom:13px;border-left:3px solid var(--bean)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="sl">'+(S.tabNames.petty||'零用金')+'餘額</div><div class="sv" style="color:var(--bean)">'+fmt(rem)+'</div></div><div style="text-align:right"><div class="sl">已使用</div><div class="sv" style="color:var(--maple)">'+fmt(tot)+'</div></div></div><div style="background:var(--surf);height:6px;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--bean);width:'+pct+'%;border-radius:3px;transition:width .4s"></div></div></div>'+
   '<div style="display:flex;gap:7px;margin-bottom:14px"><button class="ab" style="margin:0;flex:1;border-color:var(--bean);color:var(--bean)" onclick="showM(\'addPetty\')">＋ 新增支出</button><button class="ab" style="margin:0;flex:1" onclick="showM(\'setPetty\')">設定額度</button></div>'+
   '<div class="sec">'+(S.tabNames.petty||'零用金')+'明細</div>'+(!exps.length?'<div class="empty">還沒有零用金記錄</div>':exps.slice().reverse().map(e=>{const cc=e.cat?catCol(e.cat):'#9A9298';const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
-    return '<div class="ei"><div class="eirow"><div class="eico" style="background:var(--bean-ll)">🏢</div><div class="en"><div class="ename">'+(e.desc||'零用金支出')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--bean)">-'+fmt(e.amount)+'</div><button class="db" onclick="delExp(\''+e.id+'\')">✕</button></div></div></div>';
+    const lpProps=`onmousedown="editLp('${e.id}',false)" onmouseup="editLpEnd()" onmouseleave="editLpEnd()" ontouchstart="editLp('${e.id}',false)" ontouchend="editLpEnd()" ontouchmove="editLpEnd()" style="user-select:none;-webkit-user-select:none"`;
+    return '<div class="ei" '+lpProps+'><div class="eirow"><div class="eico" style="background:var(--bean-ll)">🏢</div><div class="en"><div class="ename">'+(e.desc||'零用金支出')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--bean)">-'+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\')">✕</button></div></div></div>';
   }).join(''));
 }
 
@@ -581,11 +596,16 @@ function renderAddModal(){
   const cats=isInc?S.incomeCategories:allCats();
   const selCat=isInc?AF.incCat:AF.cat;
 
-  let h='<div style="display:flex;gap:0;background:var(--surf);border-radius:var(--r);padding:3px;margin-bottom:14px">'+
-    '<button class="mb'+(isInc?'':' on')+'" style="'+(isInc?'':'background:var(--maple);color:#fff;border-color:transparent')+'" onclick="AF.type=\'exp\';renderAddModal()">支出</button>'+
-    '<button class="mb'+(isInc?' on':'')+'" style="'+(isInc?'background:var(--green);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'inc\';AF.method=\'現金\';renderAddModal()">收入</button>'+
-  '</div>'+
-  '<div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="'+AF._a+'" oninput="updInst()" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--maple)"></div>'+
+  let h='';
+  if(AF.editingId){
+    h+='<div class="mtitle" style="color:var(--maple)">編輯'+(isInc?'收入':'支出')+'紀錄</div>';
+  }else{
+    h+='<div style="display:flex;gap:0;background:var(--surf);border-radius:var(--r);padding:3px;margin-bottom:14px">'+
+      '<button class="mb'+(isInc?'':' on')+'" style="'+(isInc?'':'background:var(--maple);color:#fff;border-color:transparent')+'" onclick="AF.type=\'exp\';renderAddModal()">支出</button>'+
+      '<button class="mb'+(isInc?' on':'')+'" style="'+(isInc?'background:var(--green);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'inc\';AF.method=\'現金\';renderAddModal()">收入</button>'+
+    '</div>';
+  }
+  h+='<div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="'+AF._a+'" oninput="updInst()" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--maple)"></div>'+
   '<div class="fg"><label class="fl">日期</label>'+
     '<div onclick="openCal()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf);border:1px solid '+(isTd?'var(--green-l)':'var(--maple-l)')+';border-radius:var(--r);cursor:pointer">'+
       '<span style="font-size:14px;font-weight:700;color:'+(isTd?'var(--green)':'var(--maple)')+'">'+fmtDateDisp(AF.date)+'</span>'+
@@ -596,18 +616,16 @@ function renderAddModal(){
   '<div class="fg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><label class="fl" style="margin:0">分類</label><span style="font-size:10px;color:var(--textl)">久按可改名</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
       cats.map(c=>{const on=selCat===c,cc=catCol(c);const clickFn=isInc?"AF.incCat='"+c+"'":'AF.cat=\''+c+'\'';
-        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+';user-select:none;-webkit-user-select:none" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+');event.preventDefault()" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
+        return '<button class="catbtn'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:'+cc:'')+';user-select:none;-webkit-user-select:none" onclick="'+clickFn+';renderAddModal()" onmousedown="lpStart(\''+c+'\','+isInc+')" onmouseup="lpEnd()" onmouseleave="lpEnd()" ontouchstart="lpStart(\''+c+'\','+isInc+')" ontouchend="lpEnd()" ontouchmove="lpEnd()">'+catIcon(c)+' '+c+'</button>';
       }).join('')+
     '</div>'+
   '</div>';
 
   if(!isInc){
-    // Account selection
     h+='<div class="fg"><label class="fl">帳戶（可略）</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+
       '<button class="mb'+(!AF.accId?' on':'')+'" style="'+(!AF.accId?'background:var(--textl);color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=null;renderAddModal()">不指定</button>'+
       S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
     '</div></div>';
-    // Method
     h+='<div class="fg"><label class="fl">付款方式</label><div class="mbtns">'+
       ['現金','刷卡','零用金'].map(m=>{const on=AF.method===m;return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+MC[m]+';color:#fff;border-color:transparent':'')+'" onclick="AF.method=\''+m+'\';renderAddModal()">'+MI[m]+' '+m+'</button>';}).join('')+
     '</div></div>';
@@ -622,7 +640,7 @@ function renderAddModal(){
       h+='</div>';
     }
   }
-  h+='<button class="sub" style="background:'+(isInc?'var(--green)':acc)+'" onclick="subAdd()">記帳</button>';
+  h+='<button class="sub" style="background:'+(isInc?'var(--green)':acc)+'" onclick="subAdd()">'+(AF.editingId?'儲存修改':'記帳')+'</button>';
   document.getElementById('mc').innerHTML=h;
 }
 
@@ -630,6 +648,7 @@ function renderAddModal(){
 function showM(type){
   const mc=document.getElementById('mc'),acc=FABCOL[curC];
   if(type==='add'){
+    AF.editingId=null;
     AF.type='exp';AF.cat=allCats()[0]||CAT_DEF[0];AF.incCat=S.incomeCategories[0]||'薪資';
     AF.method='現金';AF.cardId=null;AF.accId=null;AF.inst=false;AF.periods=3;AF._a='';AF._d='';AF.date=todayStr();
     renderAddModal();
@@ -727,10 +746,27 @@ function subAdd(){
   const amt=parseFloat(document.getElementById('mamt')?.value);if(!amt||amt<=0)return;
   const desc=document.getElementById('mdesc')?.value||'';
   const ts=dateToTs(AF.date||todayStr());
-  if(AF.type==='inc')S.incomes.push({id:uid(),date:ts,amount:amt,desc,cat:AF.incCat,method:'現金',accId:AF.accId,isFund:false});
-  else{const exp={id:uid(),date:ts,amount:amt,desc,cat:AF.cat,method:AF.method,accId:AF.method!=='零用金'?AF.accId:null,isFund:false};
-    if(AF.method==='刷卡'){if(AF.cardId)exp.cardId=AF.cardId;if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;exp.inst={on:true,periods:p,monthly:Math.ceil(amt/p)};}}
-    S.expenses.push(exp);}
+  
+  if(AF.editingId){
+    if(AF.type==='inc'){
+      let item=S.incomes.find(i=>i.id===AF.editingId);
+      if(item){if(fmtDateYMD(item.date)!==AF.date)item.date=ts;item.amount=amt;item.desc=desc;item.cat=AF.incCat;item.accId=AF.accId;}
+    }else{
+      let item=S.expenses.find(e=>e.id===AF.editingId);
+      if(item){
+        if(fmtDateYMD(item.date)!==AF.date)item.date=ts;
+        item.amount=amt;item.desc=desc;item.cat=AF.cat;item.method=AF.method;item.accId=AF.method!=='零用金'?AF.accId:null;
+        if(AF.method==='刷卡'){item.cardId=AF.cardId;if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;item.inst={on:true,periods:p,monthly:Math.ceil(amt/p)};}else delete item.inst;}
+        else{delete item.cardId;delete item.inst;}
+      }
+    }
+    AF.editingId=null;
+  }else{
+    if(AF.type==='inc')S.incomes.push({id:uid(),date:ts,amount:amt,desc,cat:AF.incCat,method:'現金',accId:AF.accId,isFund:false});
+    else{const exp={id:uid(),date:ts,amount:amt,desc,cat:AF.cat,method:AF.method,accId:AF.method!=='零用金'?AF.accId:null,isFund:false};
+      if(AF.method==='刷卡'){if(AF.cardId)exp.cardId=AF.cardId;if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;exp.inst={on:true,periods:p,monthly:Math.ceil(amt/p)};}}
+      S.expenses.push(exp);}
+  }
   save();closeM();render();
 }
 function subSettings(){const b=parseFloat(document.getElementById('mbudget')?.value);const p=parseFloat(document.getElementById('mpetty')?.value);if(b>0)S.budget=b;if(p>0)S.petty.budget=p;save();closeM();render();}
