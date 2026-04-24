@@ -801,6 +801,7 @@ function renderAddModal(){
 // ─── MODALS ─────────────────────────────────────────────────────────
 function showM(type){
   const mc=document.getElementById('mc'),acc=FABCOL[curC];
+  mc.innerHTML='';
   if(type==='add'){
     AF.editingId=null;
     AF.type='exp';AF.cat=allCats()[0]||CAT_DEF[0];AF.incCat=S.incomeCategories[0]||'薪資';
