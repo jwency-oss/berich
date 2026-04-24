@@ -286,6 +286,115 @@ function rdStop(){
 }
 function goToday(){viewDate=new Date();render();}
 
+// ─── CARD LONG PRESS ────────────────────────────────────────────────
+let _cardLpTimer=null,_accLpTimer=null;
+
+function cardLp(id){cardLpEnd();_cardLpTimer=setTimeout(()=>{_cardLpTimer=null;showCardMenu(id);},600);}
+function cardLpEnd(){if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}}
+
+function showCardMenu(id){
+  const card=S.cards.find(c=>c.id===id);if(!card)return;
+  const ov=document.createElement('div');ov.id='card-menu-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">'+card.name+'</div>'+
+    '<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:16px">**** '+(card.last4||'????')+'</div>'+
+    '<button onclick="showEditCard(\''+id+'\')" style="width:100%;padding:12px;background:var(--navy-ll);border:.5px solid var(--navy-l);border-radius:var(--r);font-size:14px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-bottom:8px">✏️ 編輯卡片資料</button>'+
+    '<button onclick="confirmDelCard(\''+id+'\')" style="width:100%;padding:12px;background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);font-size:14px;font-weight:600;color:var(--maple);cursor:pointer;font-family:inherit;margin-bottom:8px">🗑 刪除此卡片</button>'+
+    '<button onclick="document.getElementById(\'card-menu-ov\').remove()" style="width:100%;padding:10px;background:var(--surf);border:none;border-radius:var(--r);font-size:13px;color:var(--textm);cursor:pointer;font-family:inherit">取消</button>'+
+  '</div>';
+  document.getElementById('W').appendChild(ov);
+}
+
+function showEditCard(id){
+  document.getElementById('card-menu-ov')?.remove();
+  const card=S.cards.find(c=>c.id===id);if(!card)return;
+  document.getElementById('mc').innerHTML=
+    '<div class="mtitle">編輯信用卡</div>'+
+    '<div class="fg"><label class="fl">卡片名稱</label><input class="fi" id="ecn" value="'+card.name+'"></div>'+
+    '<div class="fg"><label class="fl">卡號後四碼</label><input class="fi" id="ecl4" value="'+(card.last4||'')+'" maxlength="4" inputmode="numeric"></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
+      '<div><label class="fl">消費截止日</label><input class="fi" id="ecb" type="number" min="1" max="31" value="'+(card.billingCycle||'')+'" inputmode="numeric" style="margin:0"></div>'+
+      '<div><label class="fl">結帳日</label><input class="fi" id="ecs" type="number" min="1" max="31" value="'+(card.statementDate||'')+'" inputmode="numeric" style="margin:0"></div>'+
+      '<div><label class="fl">繳費日</label><input class="fi" id="ecd" type="number" min="1" max="31" value="'+(card.dueDate||'')+'" inputmode="numeric" style="margin:0"></div>'+
+    '</div>'+
+    '<button class="sub" style="background:var(--navy)" onclick="subEditCard(\''+id+'\')">儲存</button>';
+  document.getElementById('mo').style.display='flex';
+  setTimeout(()=>{const fi=document.getElementById('ecn');if(fi){fi.focus();}},80);
+}
+function subEditCard(id){
+  const card=S.cards.find(c=>c.id===id);if(!card)return;
+  const n=(document.getElementById('ecn')?.value||'').trim();if(!n)return;
+  card.name=n;card.last4=document.getElementById('ecl4')?.value||card.last4;
+  card.billingCycle=document.getElementById('ecb')?.value||card.billingCycle;
+  card.statementDate=document.getElementById('ecs')?.value||card.statementDate;
+  card.dueDate=document.getElementById('ecd')?.value||card.dueDate;
+  save();closeM();renderBody();
+}
+function confirmDelCard(id){
+  document.getElementById('card-menu-ov')?.remove();
+  const card=S.cards.find(c=>c.id===id);if(!card)return;
+  const ov=document.createElement('div');ov.id='card-del-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--maple);text-align:center;margin-bottom:8px">確認刪除？</div>'+
+    '<div style="font-size:13px;color:var(--textm);text-align:center;margin-bottom:16px;line-height:1.6">刪除「'+card.name+'」<br>相關消費紀錄仍會保留</div>'+
+    '<div style="display:flex;gap:8px"><button onclick="document.getElementById(\'card-del-ov\').remove()" style="flex:1;padding:11px;background:var(--surf);border:none;border-radius:var(--r);font-size:14px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>'+
+    '<button onclick="delCard(\''+id+'\');document.getElementById(\'card-del-ov\')?.remove()" style="flex:1;padding:11px;background:var(--maple);border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff">確認刪除</button></div>'+
+  '</div>';
+  document.getElementById('W').appendChild(ov);
+}
+
+// ─── ACCOUNT LONG PRESS ─────────────────────────────────────────────
+function accLp(id){accLpEnd();_accLpTimer=setTimeout(()=>{_accLpTimer=null;showAccMenu(id);},600);}
+function accLpEnd(){if(_accLpTimer){clearTimeout(_accLpTimer);_accLpTimer=null;}}
+
+function showAccMenu(id){
+  const a=S.accounts.find(x=>x.id===id);if(!a)return;
+  const ov=document.createElement('div');ov.id='acc-menu-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">'+accIcon(a)+' '+a.name+'</div>'+
+    '<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:16px">'+a.type+'</div>'+
+    '<button onclick="showEditAcc(\''+id+'\')" style="width:100%;padding:12px;background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);font-size:14px;font-weight:600;color:var(--maple-d);cursor:pointer;font-family:inherit;margin-bottom:8px">✏️ 編輯帳戶</button>'+
+    '<button onclick="confirmDelAcc(\''+id+'\')" style="width:100%;padding:12px;background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);font-size:14px;font-weight:600;color:var(--maple);cursor:pointer;font-family:inherit;margin-bottom:8px">🗑 刪除帳戶</button>'+
+    '<button onclick="document.getElementById(\'acc-menu-ov\').remove()" style="width:100%;padding:10px;background:var(--surf);border:none;border-radius:var(--r);font-size:13px;color:var(--textm);cursor:pointer;font-family:inherit">取消</button>'+
+  '</div>';
+  document.getElementById('W').appendChild(ov);
+}
+function showEditAcc(id){
+  document.getElementById('acc-menu-ov')?.remove();
+  const a=S.accounts.find(x=>x.id===id);if(!a)return;
+  document.getElementById('mc').innerHTML=
+    '<div class="mtitle">編輯帳戶</div>'+
+    '<div class="fg"><label class="fl">帳戶名稱</label><input class="fi" id="ean" value="'+a.name+'"></div>'+
+    '<div class="fg"><label class="fl">帳戶類型</label><div style="display:flex;flex-wrap:wrap;gap:6px" id="eatype-wrap">'+
+      Object.keys(ACC_ICONS).map(t=>'<button class="catbtn'+(a.type===t?' on':'')+'" style="'+(a.type===t?'background:'+ACC_COLS[t]+';color:#fff;border-color:'+ACC_COLS[t]:'')+'" onclick="document.querySelectorAll(\'#eatype-wrap .catbtn\').forEach(b=>{b.style.background=\'\';b.style.color=\'\';b.style.borderColor=\'\';b.classList.remove(\'on\')});this.style.background=\''+ACC_COLS[t]+'\';this.style.color=\'#fff\';this.style.borderColor=\''+ACC_COLS[t]+'\';document.getElementById(\'eatype-sel\').value=\''+t+'\'">'+ACC_ICONS[t]+' '+t+'</button>').join('')+
+    '</div><input type="hidden" id="eatype-sel" value="'+a.type+'"></div>'+
+    '<button class="sub" style="background:var(--maple)" onclick="subEditAcc(\''+id+'\')">儲存</button>';
+  document.getElementById('mo').style.display='flex';
+  setTimeout(()=>{const fi=document.getElementById('ean');if(fi){fi.focus();fi.select();}},80);
+}
+function subEditAcc(id){
+  const a=S.accounts.find(x=>x.id===id);if(!a)return;
+  const n=(document.getElementById('ean')?.value||'').trim();if(!n)return;
+  a.name=n;a.type=document.getElementById('eatype-sel')?.value||a.type;
+  save();closeM();renderBody();
+}
+function confirmDelAcc(id){
+  document.getElementById('acc-menu-ov')?.remove();
+  const a=S.accounts.find(x=>x.id===id);if(!a)return;
+  const ov=document.createElement('div');ov.id='acc-del-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--maple);text-align:center;margin-bottom:8px">確認刪除？</div>'+
+    '<div style="font-size:13px;color:var(--textm);text-align:center;margin-bottom:16px;line-height:1.6">刪除「'+a.name+'」<br>相關轉帳紀錄也會一併移除</div>'+
+    '<div style="display:flex;gap:8px"><button onclick="document.getElementById(\'acc-del-ov\').remove()" style="flex:1;padding:11px;background:var(--surf);border:none;border-radius:var(--r);font-size:14px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>'+
+    '<button onclick="delAcc(\''+id+'\');document.getElementById(\'acc-del-ov\')?.remove()" style="flex:1;padding:11px;background:var(--maple);border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff">確認刪除</button></div>'+
+  '</div>';
+  document.getElementById('W').appendChild(ov);
+}
+
 // ─── LONG PRESS TO EDIT ENTRIES ──────────────────────────────────────
 let _editTimer=null;
 function editLp(id,isInc){editLpEnd();_editTimer=setTimeout(()=>{_editTimer=null;openEdit(id,isInc);},600);}
@@ -372,8 +481,9 @@ function rCards(){
     const exps=S.expenses.filter(e=>e.cardId===card.id);
     const tot=exps.reduce((s,e)=>s+e.amount,0);
     const instMo=exps.reduce((s,e)=>{if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods);return cp<e.inst.periods?s+e.inst.monthly:s;}return s;},0);
-    h+='<div style="background:'+CC_BG[i%CC_BG.length]+';border-radius:16px;padding:18px 18px 16px;margin-bottom:10px;color:#fff;position:relative">'+
-      '<button onclick="delCard(\''+card.id+'\')" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:11px">✕</button>'+
+    const lpCard=`onmousedown="cardLp('${card.id}')" onmouseup="cardLpEnd()" onmouseleave="cardLpEnd()" ontouchstart="cardLp('${card.id}')" ontouchend="cardLpEnd()" ontouchmove="cardLpEnd()"`;
+    h+='<div style="background:'+CC_BG[i%CC_BG.length]+';border-radius:16px;padding:18px 18px 16px;margin-bottom:10px;color:#fff;position:relative;user-select:none;-webkit-user-select:none" '+lpCard+'>'+
+      '<div style="font-size:11px;opacity:.55;text-align:right;margin-bottom:4px;font-size:10px">久按可編輯／刪除</div>'+
       '<div style="font-size:16px;font-weight:700;margin-bottom:3px">'+card.name+'</div>'+
       '<div style="font-size:12px;opacity:.75;letter-spacing:2px;margin-bottom:14px">**** '+(card.last4||'????')+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
@@ -404,7 +514,7 @@ function rAccounts(){
   '<div class="sec">帳戶管理</div>';
   S.accounts.forEach(a=>{
     const b=accBal(a.id);
-    h+='<div class="acard"><div style="width:42px;height:42px;background:'+accCol(a)+'22;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+accIcon(a)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+a.name+'</div><div style="font-size:11px;color:var(--textl)">'+a.type+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+(b>=0?'var(--text)':'var(--maple)')+';">'+(b>=0?'':'-')+fmt(b)+'</div><button onclick="delAcc(\''+a.id+'\')" class="db" style="font-size:11px">✕</button></div></div>';
+    h+='<div class="acard" onmousedown="accLp(\''+a.id+'\')" onmouseup="accLpEnd()" onmouseleave="accLpEnd()" ontouchstart="accLp(\''+a.id+'\')" ontouchend="accLpEnd()" ontouchmove="accLpEnd()" style="user-select:none;-webkit-user-select:none"><div style="width:42px;height:42px;background:'+accCol(a)+'22;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+accIcon(a)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+a.name+'</div><div style="font-size:11px;color:var(--textl)">'+a.type+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+(b>=0?'var(--text)':'var(--maple)')+';">'+(b>=0?'':'-')+fmt(b)+'</div><div style="font-size:10px;color:var(--textl);margin-top:2px">久按編輯</div></div></div>';
   });
   h+='<button class="ab" onclick="showM(\'addAcc\')">＋ 新增帳戶</button>';
   // Transfers
