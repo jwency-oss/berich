@@ -296,10 +296,113 @@ function rdStop(){
 }
 function goToday(){viewDate=new Date();render();}
 
-// ─── CARD LONG PRESS ────────────────────────────────────────────────
-let _cardLpTimer=null,_accLpTimer=null;
+// ─── ACCOUNT DETAIL VIEW ────────────────────────────────────────────
+function showAccDetail(aid){
+  const a=S.accounts.find(x=>x.id===aid);if(!a)return;
+  const bal=accBal(aid);
+  // Gather all transactions for this account
+  const txList=[];
+  S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>txList.push({...i,_dir:'in'}));
+  S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>txList.push({...e,_dir:'out'}));
+  S.transfers.filter(t=>t.fromId===aid).forEach(t=>{
+    const toAcc=S.accounts.find(x=>x.id===t.toId);
+    const toCard=t.toCardId?S.cards.find(c=>c.id===t.toCardId):null;
+    const toName=toCard?('💳 '+toCard.name):(toAcc?toAcc.name:'?');
+    txList.push({...t,_dir:'xfer-out',desc:t.note||('轉至 '+toName),_toName:toName});
+  });
+  S.transfers.filter(t=>t.toId===aid).forEach(t=>{
+    const fa=S.accounts.find(x=>x.id===t.fromId);
+    txList.push({...t,_dir:'xfer-in',desc:t.note||('轉入自 '+(fa?fa.name:'?'))});
+  });
+  txList.sort((a,b)=>b.date-a.date);
 
-function cardLp(id){cardLpEnd();_cardLpTimer=setTimeout(()=>{_cardLpTimer=null;showCardMenu(id);},600);}
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
+    '<button onclick="closeM()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 6px 0 0;line-height:1">&#8249;</button>'+
+    '<div style="flex:1">'+
+      '<div style="font-size:17px;font-weight:700;color:var(--text)">'+accIcon(a)+' '+a.name+'</div>'+
+      '<div style="font-size:11px;color:var(--textl)">'+a.type+'</div>'+
+    '</div>'+
+    '<div style="text-align:right">'+
+      '<div style="font-size:18px;font-weight:700;color:'+(bal>=0?'var(--green)':'var(--maple)')+';">'+(bal<0?'-':'')+fmt(bal)+'</div>'+
+      '<div style="font-size:10px;color:var(--textl)">目前餘額</div>'+
+    '</div>'+
+  '</div>'+
+  '<div style="height:.5px;background:var(--bdr);margin-bottom:14px"></div>'+
+  (!txList.length?'<div class="empty">還沒有任何交易紀錄</div>':txList.map(e=>{
+    const isIn=e._dir==='in'||e._dir==='xfer-in';
+    const isXfer=e._dir==='xfer-in'||e._dir==='xfer-out';
+    const col=isIn?'var(--green)':'var(--maple)';
+    const bg=isIn?'var(--green-ll)':isXfer?'var(--navy-ll)':'var(--yellow-ll)';
+    const ico=isXfer?'&#8644;':isIn?'💹':'💵';
+    const cc=e.cat?catCol(e.cat):'#9A9298';
+    const ctag=e.cat&&!isXfer?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
+    return '<div class="ei"><div class="eirow">'+
+      '<div class="eico" style="background:'+bg+'">'+ico+'</div>'+
+      '<div class="en"><div class="ename">'+(e.desc||'交易')+'</div>'+
+      '<div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div>'+
+      '<div style="font-size:15px;font-weight:700;color:'+col+';">'+(isIn?'+':'-')+fmt(e.amount)+'</div>'+
+    '</div></div>';
+  }).join(''));
+  document.getElementById('mo').style.display='flex';
+}
+
+// ─── CARD DETAIL VIEW ────────────────────────────────────────────────
+function showCardDetail(cid){
+  const card=S.cards.find(c=>c.id===cid);if(!card)return;
+  const exps=S.expenses.filter(e=>e.cardId===cid).sort((a,b)=>b.date-a.date);
+  const pays=S.transfers.filter(t=>t.toCardId===cid).sort((a,b)=>b.date-a.date);
+  const tot=exps.reduce((s,e)=>s+e.amount,0);
+  const paidTot=pays.reduce((s,t)=>s+t.amount,0);
+  const unpaid=tot-paidTot;
+
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
+    '<button onclick="closeM()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 6px 0 0;line-height:1">&#8249;</button>'+
+    '<div style="flex:1">'+
+      '<div style="font-size:17px;font-weight:700;color:var(--text)">'+card.name+'</div>'+
+      '<div style="font-size:11px;color:var(--textl)">**** '+(card.last4||'????')+'</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="row2">'+
+    '<div class="sc" style="border-top:2.5px solid var(--navy)"><div class="sl">累計消費</div><div class="sv" style="color:var(--navy)">'+fmt(tot)+'</div></div>'+
+    '<div class="sc" style="border-top:2.5px solid var(--green)"><div class="sl">已繳金額</div><div class="sv" style="color:var(--green)">'+fmt(paidTot)+'</div></div>'+
+  '</div>'+
+  (unpaid>0?
+    '<div style="background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">'+
+      '<div><div style="font-size:11px;color:var(--maple-d);font-weight:600">⚠ 未繳餘額</div><div style="font-size:10px;color:var(--maple-l);margin-top:2px">結帳日：每月 '+(card.statementDate||'?')+' 日</div></div>'+
+      '<div style="font-size:18px;font-weight:700;color:var(--maple)">'+fmt(unpaid)+'</div>'+
+    '</div>':
+    '<div style="background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;text-align:center;font-size:13px;font-weight:600;color:var(--green)">✓ 已全額繳清</div>')+
+  '<div class="sec">消費明細</div>'+
+  (!exps.length?'<div class="empty">還沒有刷卡消費</div>':exps.map(e=>{
+    const cc=e.cat?catCol(e.cat):'#9A9298';
+    const ctag=e.cat?'<span class="tag" style="background:'+cc+'20;color:'+cc+';border:.5px solid '+cc+'44">'+catIcon(e.cat)+' '+e.cat+'</span>':'';
+    let ib='';
+    if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods),done=cp>=e.inst.periods,pt=Math.min(100,Math.round(cp/e.inst.periods*100));
+      ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+(done?'var(--yellow)':'var(--plum)')+';font-weight:500">'+(done?'✓ 已付清':'第'+cp+'/'+e.inst.periods+'期')+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+(done?'var(--yellow)':'var(--plum)')+';width:'+pt+'%"></div></div></div>';
+    }
+    return '<div class="ei"><div class="eirow">'+
+      '<div class="eico" style="background:var(--navy-ll)">💳</div>'+
+      '<div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div>'+
+      '<div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\')">✕</button></div>'+
+    '</div>'+ib+'</div>';
+  }).join(''))+
+  (pays.length?'<div class="sec" style="margin-top:8px">繳費紀錄</div>'+pays.map(t=>{
+    const fa=S.accounts.find(a=>a.id===t.fromId);
+    return '<div class="ei"><div class="eirow">'+
+      '<div class="eico" style="background:var(--green-ll)">💸</div>'+
+      '<div class="en"><div class="ename">'+(t.note||'繳費')+'</div><div class="emeta"><span style="color:var(--textl)">'+(fa?fa.name:'?')+' · '+fmtD(t.date)+'</span></div></div>'+
+      '<div style="font-size:15px;font-weight:700;color:var(--green)">+'+fmt(t.amount)+'</div>'+
+    '</div></div>';
+  }).join(''):'');
+  document.getElementById('mo').style.display='flex';
+}
+
+// ─── CARD LONG PRESS ────────────────────────────────────────────────
+let _cardLpTimer=null,_accLpTimer=null,_lpFired=false;
+
+function cardLp(id){cardLpEnd();_lpFired=false;_cardLpTimer=setTimeout(()=>{_cardLpTimer=null;_lpFired=true;showCardMenu(id);},600);}
 function cardLpEnd(){if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}}
 
 function showCardMenu(id){
@@ -356,7 +459,7 @@ function confirmDelCard(id){
 }
 
 // ─── ACCOUNT LONG PRESS ─────────────────────────────────────────────
-function accLp(id){accLpEnd();_accLpTimer=setTimeout(()=>{_accLpTimer=null;showAccMenu(id);},600);}
+function accLp(id){accLpEnd();_lpFired=false;_accLpTimer=setTimeout(()=>{_accLpTimer=null;_lpFired=true;showAccMenu(id);},600);}
 function accLpEnd(){if(_accLpTimer){clearTimeout(_accLpTimer);_accLpTimer=null;}}
 
 function showAccMenu(id){
@@ -492,8 +595,8 @@ function rCards(){
     const tot=exps.reduce((s,e)=>s+e.amount,0);
     const instMo=exps.reduce((s,e)=>{if(e.inst&&e.inst.on){const cp=curPer(e.date,e.inst.periods);return cp<e.inst.periods?s+e.inst.monthly:s;}return s;},0);
     const lpCard=`onmousedown="cardLp('${card.id}')" onmouseup="cardLpEnd()" onmouseleave="cardLpEnd()" ontouchstart="cardLp('${card.id}')" ontouchend="cardLpEnd()" ontouchmove="cardLpEnd()"`;
-    h+='<div style="background:'+CC_BG[i%CC_BG.length]+';border-radius:16px;padding:18px 18px 16px;margin-bottom:10px;color:#fff;position:relative;user-select:none;-webkit-user-select:none" '+lpCard+'>'+
-      '<div style="font-size:11px;opacity:.55;text-align:right;margin-bottom:4px;font-size:10px">久按可編輯／刪除</div>'+
+    h+='<div onclick="if(!_lpFired)showCardDetail(\''+card.id+'\')" style="background:'+CC_BG[i%CC_BG.length]+';border-radius:16px;padding:18px 18px 16px;margin-bottom:10px;color:#fff;position:relative;user-select:none;-webkit-user-select:none;cursor:pointer" '+lpCard+'>'+
+      '<div style="position:absolute;top:14px;right:14px;font-size:10px;opacity:.6">久按編輯 · 點擊查看 ›</div>'+
       '<div style="font-size:16px;font-weight:700;margin-bottom:3px">'+card.name+'</div>'+
       '<div style="font-size:12px;opacity:.75;letter-spacing:2px;margin-bottom:14px">**** '+(card.last4||'????')+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
@@ -526,7 +629,11 @@ function rAccounts(){
   '</div><div class="sec">帳戶管理</div>';
   S.accounts.forEach(a=>{
     const b=accBal(a.id);
-    h+='<div class="acard" onmousedown="accLp(\''+a.id+'\')" onmouseup="accLpEnd()" onmouseleave="accLpEnd()" ontouchstart="accLp(\''+a.id+'\')" ontouchend="accLpEnd()" ontouchmove="accLpEnd()" style="user-select:none;-webkit-user-select:none"><div style="width:42px;height:42px;background:'+accCol(a)+'22;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+accIcon(a)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+a.name+'</div><div style="font-size:11px;color:var(--textl)">'+a.type+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+(b>=0?'var(--text)':'var(--maple)')+';">'+(b>=0?'':'-')+fmt(b)+'</div><div style="font-size:10px;color:var(--textl);margin-top:2px">久按編輯</div></div></div>';
+    h+='<div class="acard" onclick="if(!_lpFired)showAccDetail(\''+a.id+'\')" onmousedown="accLp(\''+a.id+'\')" onmouseup="accLpEnd()" onmouseleave="accLpEnd()" ontouchstart="accLp(\''+a.id+'\')" ontouchend="accLpEnd()" ontouchmove="accLpEnd()" style="user-select:none;-webkit-user-select:none;cursor:pointer">'+
+      '<div style="width:42px;height:42px;background:'+accCol(a)+'22;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+accIcon(a)+'</div>'+
+      '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+a.name+'</div><div style="font-size:11px;color:var(--textl)">'+a.type+'</div></div>'+
+      '<div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+(b>=0?'var(--text)':'var(--maple)')+';">'+(b>=0?'':'-')+fmt(b)+'</div><div style="font-size:10px;color:var(--textl);margin-top:2px">點擊查看 ›</div></div>'+
+    '</div>';
   });
   h+='<button class="ab" onclick="showM(\'addAcc\')">＋ 新增帳戶</button>';
   // Transfers
