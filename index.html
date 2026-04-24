@@ -605,6 +605,7 @@ function renderAddModal(){
       '<button class="mb'+(isInc?' on':'')+'" style="'+(isInc?'background:var(--green);color:#fff;border-color:transparent':'')+'" onclick="AF.type=\'inc\';AF.method=\'現金\';renderAddModal()">收入</button>'+
     '</div>';
   }
+  
   h+='<div class="fg"><label class="fl">金額</label><input class="fi" id="mamt" type="number" placeholder="0" inputmode="decimal" value="'+AF._a+'" oninput="updInst()" style="font-size:22px;font-weight:700;text-align:center;padding:14px;color:var(--maple)"></div>'+
   '<div class="fg"><label class="fl">日期</label>'+
     '<div onclick="openCal()" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf);border:1px solid '+(isTd?'var(--green-l)':'var(--maple-l)')+';border-radius:var(--r);cursor:pointer">'+
@@ -621,11 +622,12 @@ function renderAddModal(){
     '</div>'+
   '</div>';
 
+  h+='<div class="fg"><label class="fl">帳戶（可略）</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+    '<button class="mb'+(!AF.accId?' on':'')+'" style="'+(!AF.accId?'background:var(--textl);color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=null;renderAddModal()">不指定</button>'+
+    S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
+  '</div></div>';
+
   if(!isInc){
-    h+='<div class="fg"><label class="fl">帳戶（可略）</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+
-      '<button class="mb'+(!AF.accId?' on':'')+'" style="'+(!AF.accId?'background:var(--textl);color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=null;renderAddModal()">不指定</button>'+
-      S.accounts.map(a=>{const on=AF.accId===a.id,cc=accCol(a);return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+cc+';color:#fff;border-color:transparent':'')+';flex:none;padding:7px 12px;font-size:12px" onclick="AF.accId=\''+a.id+'\';renderAddModal()">'+accIcon(a)+' '+a.name+'</button>';}).join('')+
-    '</div></div>';
     h+='<div class="fg"><label class="fl">付款方式</label><div class="mbtns">'+
       ['現金','刷卡','零用金'].map(m=>{const on=AF.method===m;return '<button class="mb'+(on?' on':'')+'" style="'+(on?'background:'+MC[m]+';color:#fff;border-color:transparent':'')+'" onclick="AF.method=\''+m+'\';renderAddModal()">'+MI[m]+' '+m+'</button>';}).join('')+
     '</div></div>';
