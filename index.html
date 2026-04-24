@@ -747,16 +747,102 @@ function showChart(period){
 
 // ─── CATEGORY MGMT ──────────────────────────────────────────────────
 function showCatMgmt(){
-  document.getElementById('mc').innerHTML=
-    '<div style="display:flex;align-items:center;margin-bottom:14px"><button onclick="showChart()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:18px;padding:0 8px 0 0">&#8249;</button><div class="mtitle" style="margin:0;flex:1;text-align:center">管理分類</div></div>'+
-    '<div class="sec">預設分類</div>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px">'+CAT_DEF.map(c=>'<span style="background:'+catCol(c)+'18;border:.5px solid '+catCol(c)+'44;border-radius:20px;padding:5px 11px;font-size:12px;color:'+catCol(c)+'">'+catIcon(c)+' '+c+'</span>').join('')+'</div>'+
-    '<div class="sec">自訂分類</div>'+
-    (!S.customCats.length?'<div style="font-size:12px;color:var(--textl);text-align:center;padding:8px 0 14px">還沒有自訂分類</div>':S.customCats.map(c=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--bdr)"><div style="width:10px;height:10px;border-radius:50%;background:'+c.color+';flex-shrink:0"></div><span style="flex:1;font-size:13px;color:var(--text)">'+c.name+'</span><button class="db" onclick="delCat(\''+c.name+'\')">✕</button></div>').join(''))+
-    '<div class="fg" style="margin-top:14px"><label class="fl">新增自訂分類</label><div style="display:flex;gap:8px"><input class="fi" id="new-cat" placeholder="分類名稱..." style="margin:0;flex:1"><button style="background:var(--maple);color:#fff;border:none;border-radius:var(--r);padding:0 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;flex-shrink:0" onclick="subAddCat()">新增</button></div></div>';
-  setTimeout(()=>{const fi=document.getElementById('new-cat');if(fi)fi.focus();},50);
+  const mc=document.getElementById('mc');
+  mc.innerHTML=
+    '<div style="display:flex;align-items:center;margin-bottom:16px">'+
+      '<button onclick="showChart()" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 8px 0 0;line-height:1">&#8249;</button>'+
+      '<div class="mtitle" style="margin:0;flex:1;text-align:center">管理分類</div>'+
+    '</div>'+
+
+    // ── 支出分類 ──
+    '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">支出分類 <span style="color:var(--textl);font-weight:400;font-size:11px">（點鉛筆改名）</span></div>'+
+    '<div style="background:var(--card);border-radius:var(--r);border:.5px solid var(--bdr);overflow:hidden;margin-bottom:14px">'+
+      S.categories.map((c,i)=>{
+        const col=catCol(c);
+        const isLast=i===S.categories.length-1;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:'+(isLast?'none':'.5px solid var(--bdr)')+'">'+
+          '<div style="width:28px;height:28px;background:'+col+'18;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+catIcon(c)+'</div>'+
+          '<span style="flex:1;font-size:13px;font-weight:500;color:var(--text)">'+c+'</span>'+
+          '<button onclick="showRenameCatDirect(\''+c+'\',false)" style="background:var(--surf);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--textl)">✏️</button>'+
+          '<button onclick="confirmDelExpCat(\''+c+'\')" style="background:var(--maple-ll);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--maple)">✕</button>'+
+        '</div>';
+      }).join('')+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:18px">'+
+      '<input class="fi" id="new-exp-cat" placeholder="新增支出分類..." style="margin:0;flex:1">'+
+      '<button style="background:var(--maple);color:#fff;border:none;border-radius:var(--r);padding:0 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;flex-shrink:0" onclick="subAddExpCat()">新增</button>'+
+    '</div>'+
+
+    // ── 收入分類 ──
+    '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">收入分類 <span style="color:var(--textl);font-weight:400;font-size:11px">（點鉛筆改名）</span></div>'+
+    '<div style="background:var(--card);border-radius:var(--r);border:.5px solid var(--bdr);overflow:hidden;margin-bottom:14px">'+
+      S.incomeCategories.map((c,i)=>{
+        const col=catCol(c);
+        const isLast=i===S.incomeCategories.length-1;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:'+(isLast?'none':'.5px solid var(--bdr)')+'">'+
+          '<div style="width:28px;height:28px;background:'+col+'18;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+catIcon(c)+'</div>'+
+          '<span style="flex:1;font-size:13px;font-weight:500;color:var(--text)">'+c+'</span>'+
+          '<button onclick="showRenameCatDirect(\''+c+'\',true)" style="background:var(--surf);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--textl)">✏️</button>'+
+          '<button onclick="confirmDelIncCat(\''+c+'\')" style="background:var(--maple-ll);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--maple)">✕</button>'+
+        '</div>';
+      }).join('')+
+    '</div>'+
+    '<div style="display:flex;gap:8px">'+
+      '<input class="fi" id="new-inc-cat" placeholder="新增收入分類..." style="margin:0;flex:1">'+
+      '<button style="background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:0 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;flex-shrink:0" onclick="subAddIncCat()">新增</button>'+
+    '</div>';
 }
-function subAddCat(){const n=(document.getElementById('new-cat')?.value||'').trim();if(!n)return;if([...S.categories,...S.customCats.map(c=>c.name)].includes(n)){alert('名稱已存在');return;}S.customCats.push({name:n,color:XCOL[S.customCats.length%XCOL.length]});save();showCatMgmt();}
+
+// 改名（直接從管理頁）
+function showRenameCatDirect(old, isInc){
+  const ov=document.createElement('div');ov.id='ren-ov-direct';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:340px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:14px">修改分類名稱</div>'+
+    '<input id="ren-inp-d" class="fi" placeholder="新名稱..." value="'+old+'" style="text-align:center;font-size:16px;font-weight:600">'+
+    '<div style="display:flex;gap:8px;margin-top:12px">'+
+      '<button onclick="document.getElementById(\'ren-ov-direct\').remove()" style="flex:1;padding:11px;background:var(--surf);border:none;border-radius:var(--r);font-size:14px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>'+
+      '<button onclick="doRenameDirect(\''+old+'\','+isInc+')" style="flex:1;padding:11px;background:var(--maple);border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff">確認</button>'+
+    '</div></div>';
+  document.getElementById('W').appendChild(ov);
+  setTimeout(()=>{const i=document.getElementById('ren-inp-d');if(i){i.focus();i.select();}},80);
+}
+function doRenameDirect(old,isInc){
+  const nw=(document.getElementById('ren-inp-d')?.value||'').trim();
+  if(!nw||nw===old){document.getElementById('ren-ov-direct')?.remove();return;}
+  const allNames=[...S.categories,...S.customCats.map(c=>c.name),...S.incomeCategories];
+  if(allNames.includes(nw)&&nw!==old){alert('名稱已存在');return;}
+  if(isInc){const idx=S.incomeCategories.indexOf(old);if(idx>=0)S.incomeCategories[idx]=nw;S.incomes.forEach(i=>{if(i.cat===old)i.cat=nw;});}
+  else{const si=S.categories.indexOf(old);if(si>=0)S.categories[si]=nw;else{const ci=S.customCats.findIndex(c=>c.name===old);if(ci>=0)S.customCats[ci].name=nw;}S.expenses.forEach(e=>{if(e.cat===old)e.cat=nw;});}
+  save();document.getElementById('ren-ov-direct')?.remove();showCatMgmt();
+}
+
+// 新增分類
+function subAddExpCat(){
+  const n=(document.getElementById('new-exp-cat')?.value||'').trim();if(!n)return;
+  if([...S.categories,...S.customCats.map(c=>c.name),...S.incomeCategories].includes(n)){alert('名稱已存在');return;}
+  S.categories.push(n);save();showCatMgmt();
+}
+function subAddIncCat(){
+  const n=(document.getElementById('new-inc-cat')?.value||'').trim();if(!n)return;
+  if([...S.categories,...S.customCats.map(c=>c.name),...S.incomeCategories].includes(n)){alert('名稱已存在');return;}
+  S.incomeCategories.push(n);save();showCatMgmt();
+}
+
+// 刪除確認
+function confirmDelExpCat(name){
+  if(S.categories.length<=1){alert('至少保留一個支出分類');return;}
+  if(!confirm('刪除「'+name+'」？已有此分類的記錄不受影響。')){return;}
+  S.categories=S.categories.filter(c=>c!==name);save();showCatMgmt();
+}
+function confirmDelIncCat(name){
+  if(S.incomeCategories.length<=1){alert('至少保留一個收入分類');return;}
+  if(!confirm('刪除「'+name+'」？已有此分類的記錄不受影響。')){return;}
+  S.incomeCategories=S.incomeCategories.filter(c=>c!==name);save();showCatMgmt();
+}
+
+// 保留舊的 subAddCat / delCat 供相容
+function subAddCat(){subAddExpCat();}
 function delCat(n){S.customCats=S.customCats.filter(c=>c.name!==n);save();showCatMgmt();}
 
 // ─── RECURRING MGMT ─────────────────────────────────────────────────
