@@ -115,9 +115,9 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
 </div>
 <script>
 // ─── CONSTANTS ──────────────────────────────────────────────────────
-const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司'];
-const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦'};
-const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A'};
+const CAT_DEF=['飲食','投資','保險','追星','寵物','交通','機車','交際','公司','自訂一','自訂二','自訂三'];
+const CAT_ICONS={飲食:'🍜',投資:'📈',保險:'🛡',追星:'⭐',寵物:'🐾',交通:'🚌',機車:'🏍',交際:'🍻',公司:'🏢',薪資:'💼',外快:'💡',獎金:'🎁',紅包:'🧧',利息股利:'💰',報帳回饋:'🏷',網拍二手:'📦',自訂一:'✨',自訂二:'✨',自訂三:'✨',收自訂一:'✨',收自訂二:'✨',收自訂三:'✨'};
+const CAT_COL={飲食:'#C9A85C',投資:'#6B8F72',保險:'#566D82',追星:'#C47A7A',寵物:'#D4A870',交通:'#789098',機車:'#A89070',交際:'#9B8EB8',公司:'#7A8E8A',薪資:'#6B8F72',外快:'#C9A85C',獎金:'#CC8874',紅包:'#B85550',利息股利:'#8CA08A',報帳回饋:'#8898A8',網拍二手:'#A0907A',自訂一:'#9A9298',自訂二:'#9A9298',自訂三:'#9A9298',收自訂一:'#6B8F72',收自訂二:'#6B8F72',收自訂三:'#6B8F72'};
 const XCOL=['#B85550','#8CA08A','#7A6C9A','#C4A890','#7AA4B2','#CC8874','#B0A050','#889880'];
 const CC_BG=['linear-gradient(140deg,#566D82,#3A4E64)','linear-gradient(140deg,#6B8F72,#4A7055)','linear-gradient(140deg,#7A6C9A,#5A4C7A)','linear-gradient(140deg,#B85550,#8A3530)','linear-gradient(140deg,#8CA08A,#6A8068)'];
 const ACC_ICONS={現金:'💵',銀行:'🏦',電子錢包:'📱',悠遊卡:'🎫',其他:'💰'};
@@ -132,7 +132,7 @@ let S={
   petty:{budget:5000}, fund:{balance:0},
   tabNames:{petty:'零用金',fund:'私房錢'},
   categories:[...CAT_DEF], customCats:[],
-  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手']
+  incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三']
 };
 let viewDate=new Date(), tab='today', curC='y', chartPer='month';
 let AF={type:'exp',cat:'飲食',incCat:'薪資',date:'',method:'現金',cardId:null,accId:null,inst:false,periods:3,_a:'',_d:''};
@@ -160,8 +160,9 @@ const accCol=a=>ACC_COLS[a.type]||'#9A9298';
 // ─── STORAGE ────────────────────────────────────────────────────────
 function load(){
   try{const d=localStorage.getItem('Berich_V10');if(d)Object.assign(S,JSON.parse(d));
-    if(!S.categories)S.categories=[...CAT_DEF];if(!S.customCats)S.customCats=[];
-    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手'];
+    if(!S.categories)S.categories=[...CAT_DEF];
+    if(!S.customCats)S.customCats=[];
+    if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手','收自訂一','收自訂二','收自訂三'];
     if(!S.petty)S.petty={budget:5000};if(!S.fund)S.fund={balance:0};
     if(!S.incomes)S.incomes=[];if(!S.cards)S.cards=[];
     if(!S.accounts||!S.accounts.length)S.accounts=[{id:'acc-cash',name:'現金',type:'現金',initBal:0}];
@@ -169,6 +170,10 @@ function load(){
     if(!S.tabNames)S.tabNames={petty:'零用金',fund:'私房錢'};
     if(!S.tabNames.petty)S.tabNames.petty='零用金';
     if(!S.tabNames.fund)S.tabNames.fund='私房錢';
+    
+    // 防呆補丁：如果舊用戶沒有這些自訂空位，自動補上且不覆蓋舊資料
+    if(!S.categories.includes('自訂一') && !S.categories.some(c=>c.includes('自訂'))) S.categories.push('自訂一','自訂二','自訂三');
+    if(!S.incomeCategories.includes('收自訂一') && !S.incomeCategories.some(c=>c.includes('收自訂'))) S.incomeCategories.push('收自訂一','收自訂二','收自訂三');
   }catch(e){}
   checkRecurring();render();
 }
