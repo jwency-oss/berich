@@ -162,7 +162,17 @@ const catIcon=c=>CAT_ICONS[c]||'📌';
 const catCol=c=>{if(CAT_COL[c])return CAT_COL[c];const x=S.customCats.find(x=>x.name===c);return x?x.color:'#9A9298'};
 const fmtDateDisp=str=>{if(!str||str===todayStr())return'今天';const[y,m,d]=str.split('-');return str.slice(0,4)===todayStr().slice(0,4)?parseInt(m)+'月'+parseInt(d)+'日':y+'/'+parseInt(m)+'/'+parseInt(d)};
 const fmtDateYMD=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-const accBal=aid=>{const a=S.accounts.find(x=>x.id===aid);if(!a)return 0;let b=a.initBal||0;S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>b+=i.amount);S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>b-=e.amount);S.transfers.filter(t=>t.toId===aid).forEach(t=>b+=t.amount);S.transfers.filter(t=>t.fromId===aid).forEach(t=>b-=t.amount);return b};
+const accBal=aid=>{
+  const a=S.accounts.find(x=>x.id===aid);if(!a)return 0;
+  let b=a.initBal||0;
+  S.incomes.filter(i=>i.accId===aid&&!i.isFund).forEach(i=>b+=i.amount);
+  S.expenses.filter(e=>e.accId===aid&&!e.isFund).forEach(e=>b-=e.amount);
+  // 轉入：只計真實帳戶間的轉帳（排除信用卡還款的虛擬轉入）
+  S.transfers.filter(t=>t.toId===aid).forEach(t=>b+=t.amount);
+  // 轉出：包含信用卡還款
+  S.transfers.filter(t=>t.fromId===aid).forEach(t=>b-=t.amount);
+  return b;
+};
 const totalAssets=()=>S.accounts.reduce((s,a)=>s+accBal(a.id),0);
 const accIcon=a=>ACC_ICONS[a.type]||'💰';
 const accCol=a=>ACC_COLS[a.type]||'#9A9298';
@@ -492,7 +502,7 @@ function rCards(){
         '<div><div style="font-size:9px;opacity:.65;margin-bottom:2px">繳費日</div><div style="font-size:12px;font-weight:600">每月 '+(card.dueDate||'?')+' 日</div></div>'+
       '</div></div>';
     if(exps.length){
-      const payments=S.expenses.filter(e=>e.cardPayment===card.id);
+      const payments=S.transfers.filter(e=>e.toCardId===card.id);
     const paidTotal=payments.reduce((s,e)=>s+e.amount,0);
     h+='<div class="row2"><div class="sc" style="border-top:2.5px solid var(--navy)"><div class="sl">累計消費</div><div class="sv" style="color:var(--navy)">'+fmt(tot)+'</div></div><div class="sc" style="border-top:2.5px solid var(--green)"><div class="sl">已繳金額</div><div class="sv" style="color:var(--green)">'+fmt(paidTotal)+'</div></div></div>'+
     (tot>paidTotal?'<div style="background:var(--maple-ll);border:.5px solid var(--maple-l);border-radius:var(--r);padding:9px 13px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--maple-d);font-weight:600">⚠ 未繳餘額</span><span style="font-size:15px;font-weight:700;color:var(--maple)">'+fmt(tot-paidTotal)+'</span></div>':'<div style="background:var(--green-ll);border:.5px solid var(--green-l);border-radius:var(--r);padding:9px 13px;margin-bottom:10px;text-align:center;font-size:12px;color:var(--green);font-weight:600">✓ 已全額繳清</div>');
@@ -510,8 +520,10 @@ function rCards(){
 // ─── ACCOUNTS TAB ───────────────────────────────────────────────────
 function rAccounts(){
   const tot=totalAssets();
-  let h='<div style="background:linear-gradient(145deg,#B85550,#8A3530);border-radius:18px;padding:20px;color:#fff;text-align:center;margin-bottom:14px"><div style="font-size:11px;opacity:.75;margin-bottom:4px">總資產</div><div class="pnum" style="font-size:38px;letter-spacing:-1.5px;line-height:1.1">'+fmt(tot)+'</div></div>'+
-  '<div class="sec">帳戶管理</div>';
+  let h='<div style="background:linear-gradient(145deg,#B85550,#8A3530);border-radius:18px;padding:20px;color:#fff;text-align:center;margin-bottom:14px"><div style="font-size:11px;opacity:.75;margin-bottom:4px">總資產</div>'+
+  '<div class="pnum" style="font-size:38px;letter-spacing:-1.5px;line-height:1.1;color:'+(tot<0?'#FFAAAA':'#fff')+'">'+(tot<0?'-':'')+fmt(tot)+'</div>'+
+  (tot<0?'<div style="font-size:11px;opacity:.7;margin-top:4px">帳戶餘額為負，請確認初始餘額設定</div>':'')+
+  '</div><div class="sec">帳戶管理</div>';
   S.accounts.forEach(a=>{
     const b=accBal(a.id);
     h+='<div class="acard" onmousedown="accLp(\''+a.id+'\')" onmouseup="accLpEnd()" onmouseleave="accLpEnd()" ontouchstart="accLp(\''+a.id+'\')" ontouchend="accLpEnd()" ontouchmove="accLpEnd()" style="user-select:none;-webkit-user-select:none"><div style="width:42px;height:42px;background:'+accCol(a)+'22;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+accIcon(a)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+a.name+'</div><div style="font-size:11px;color:var(--textl)">'+a.type+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+(b>=0?'var(--text)':'var(--maple)')+';">'+(b>=0?'':'-')+fmt(b)+'</div><div style="font-size:10px;color:var(--textl);margin-top:2px">久按編輯</div></div></div>';
@@ -521,8 +533,11 @@ function rAccounts(){
   const xfers=S.transfers.slice().reverse().slice(0,10);
   h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="sec" style="margin-bottom:0">帳戶轉帳</div><button onclick="showM(\'transfer\')" style="font-size:12px;color:var(--navy);background:var(--navy-ll);border:none;padding:4px 12px;border-radius:12px;cursor:pointer;font-family:inherit">＋ 轉帳</button></div><div style="margin-top:8px">';
   if(!xfers.length)h+='<div style="font-size:13px;color:var(--textl);text-align:center;padding:10px 0">還沒有轉帳紀錄</div>';
-  xfers.forEach(x=>{const fa=S.accounts.find(a=>a.id===x.fromId),ta=S.accounts.find(a=>a.id===x.toId);
-    h+='<div class="ei"><div class="eirow"><div class="eico" style="background:var(--navy-ll)">&#8644;</div><div class="en"><div class="ename">'+(fa?fa.name:'?')+' &#8594; '+(ta?ta.name:'?')+'</div><div class="emeta"><span style="color:var(--textl)">'+(x.note||'轉帳')+' · '+fmtD(x.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">'+fmt(x.amount)+'</div><button class="db" onclick="delXfer(\''+x.id+'\')">✕</button></div></div></div>';
+  xfers.forEach(x=>{
+    const fa=S.accounts.find(a=>a.id===x.fromId);
+    const ta=S.accounts.find(a=>a.id===x.toId);
+    const toName=x.toCardId?(()=>{const c=S.cards.find(c=>c.id===x.toCardId);return c?'💳 '+c.name:'信用卡';})():(ta?ta.name:'?');
+    h+='<div class="ei"><div class="eirow"><div class="eico" style="background:var(--navy-ll)">&#8644;</div><div class="en"><div class="ename">'+(fa?fa.name:'?')+' &#8594; '+toName+'</div><div class="emeta"><span style="color:var(--textl)">'+(x.note||'轉帳')+' · '+fmtD(x.date)+'</span></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">'+fmt(x.amount)+'</div><button class="db" onclick="delXfer(\''+x.id+'\')">✕</button></div></div></div>';
   });
   return h+'</div>';
 }
@@ -908,8 +923,15 @@ function subAdd(){
     if(!AF.cardId){alert('請選擇要繳費的信用卡');return;}
     const card=S.cards.find(c=>c.id===AF.cardId);
     const cardName=card?card.name:'信用卡';
-    S.transfers.push({id:uid(),date:ts,fromId:AF.accId,toId:'__card__'+AF.cardId,toCardId:AF.cardId,amount:amt,note:desc||'繳 '+cardName+' 帳單'});
-    S.expenses.push({id:uid(),date:ts,amount:amt,desc:desc||'繳 '+cardName+' 帳單',cat:'保險',method:'轉帳',accId:AF.accId,cardPayment:AF.cardId,isFund:false});
+    // 只建立一筆轉帳記錄，避免帳戶被雙重扣款
+    S.transfers.push({
+      id:uid(),date:ts,
+      fromId:AF.accId,
+      toId:'__card_payment__',  // 信用卡還款不是真實帳戶轉入
+      toCardId:AF.cardId,
+      amount:amt,
+      note:desc||('繳 '+cardName+' 帳單')
+    });
     save();closeM();render();return;
   }
   if(AF.editingId){
