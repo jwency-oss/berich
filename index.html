@@ -4,8 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Berich</title>
+<meta name="theme-color" content="#B85550">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<link rel="apple-touch-icon" id="pwa-icon" href="">
+<link rel="manifest" id="pwa-manifest" href="">
+<meta name="apple-mobile-web-app-title" content="Berich">
+<meta name="theme-color" content="#B85550">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -164,6 +175,7 @@ function load(){
     if(!S.recurring)S.recurring=[];if(!S.transfers)S.transfers=[];
   }catch(e){}
   checkRecurring();render();
+  initPWAIcon();
 }
 const save=()=>{try{localStorage.setItem('Berich_V10',JSON.stringify(S));}catch(e){}};
 
@@ -714,6 +726,48 @@ function delFundExp(id){const e=S.expenses.find(x=>x.id===id);if(e){S.fund.balan
 function delFundInc(id){const i=S.incomes.find(x=>x.id===id);if(i){S.fund.balance=Math.max(0,S.fund.balance-i.amount);S.incomes=S.incomes.filter(x=>x.id!==id);}save();render();}
 function delCard(id){S.cards=S.cards.filter(c=>c.id!==id);save();render();}
 function delAcc(id){if(S.accounts.length<=1){alert('至少保留一個帳戶');return;}S.accounts=S.accounts.filter(a=>a.id!==id);S.transfers=S.transfers.filter(t=>t.fromId!==id&&t.toId!==id);save();if(tab==='accounts')renderBody();else render();}
+
+// ─── PWA ICON (canvas-generated, no external files needed) ──────────
+function initPWAIcon(){
+  const S2=192,R=42;
+  const cv=document.createElement('canvas');cv.width=cv.height=S2;
+  const cx=cv.getContext('2d');
+  // Rounded rect background
+  cx.beginPath();cx.moveTo(R,0);cx.lineTo(S2-R,0);cx.arcTo(S2,0,S2,R,R);
+  cx.lineTo(S2,S2-R);cx.arcTo(S2,S2,S2-R,S2,R);cx.lineTo(R,S2);cx.arcTo(0,S2,0,S2-R,R);
+  cx.lineTo(0,R);cx.arcTo(0,0,R,0,R);cx.closePath();
+  cx.fillStyle='#B85550';cx.fill();
+  // Big circle (white)
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.fillStyle='rgba(255,255,255,0.95)';cx.fill();
+  // Ring on big circle
+  cx.beginPath();cx.arc(96,76,47,0,Math.PI*2);
+  cx.strokeStyle='rgba(184,85,80,0.25)';cx.lineWidth=5;cx.stroke();
+  // "B" letter
+  cx.fillStyle='#8A3530';
+  cx.font='900 52px Impact,Arial Black,sans-serif';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('B',96,76);
+  // Neck
+  cx.fillStyle='rgba(255,255,255,0.88)';
+  cx.beginPath();cx.roundRect(89,121,14,18,4);cx.fill();
+  // Small circle (plum)
+  cx.beginPath();cx.arc(96,158,26,0,Math.PI*2);
+  cx.fillStyle='#7A6C9A';cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.9)';
+  cx.font='bold 11px -apple-system,PingFang TC,sans-serif';
+  cx.fillText('私房錢',96,158);
+
+  const url=cv.toDataURL('image/png');
+  document.getElementById('pwa-icon').href=url;
+
+  // Dynamic manifest so Chrome/Android also gets icon
+  const mf={name:'Berich 記帳',short_name:'Berich',start_url:location.href,
+    display:'standalone',background_color:'#F4EBE8',theme_color:'#B85550',
+    icons:[{src:url,sizes:'192x192',type:'image/png',purpose:'any maskable'}]};
+  const blob=new Blob([JSON.stringify(mf)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
+}
 
 load();
 </script>
