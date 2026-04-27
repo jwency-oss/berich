@@ -439,9 +439,10 @@ function renderCardDetail(){
           const bCol=b<=0?'var(--yellow)':done?'var(--yellow)':'var(--plum)';
           ib='<div style="margin-top:7px;padding-top:7px;border-top:.5px solid var(--bdr)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:'+bCol+';font-weight:500">'+statTxt+'</span><span style="font-size:11px;color:var(--textl)">每期 '+fmt(e.inst.monthly)+'</span></div><div style="background:var(--surf);height:4px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+bCol+';width:'+pt+'%"></div></div></div>';
         }
-        h+='<div class="ei"><div class="eirow">'+
+        const lpProps='onmousedown="cardItemLp(\''+e.id+'\')" onmouseup="cardItemLpEnd()" onmouseleave="cardItemLpEnd()" ontouchstart="cardItemLp(\''+e.id+'\')" ontouchend="cardItemLpEnd()" ontouchmove="cardItemLpEnd()" style="user-select:none;-webkit-user-select:none"';
+        h+='<div class="ei" '+lpProps+'><div class="eirow">'+
           '<div class="eico" style="background:var(--navy-ll)">💳</div>'+
-          '<div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span></div></div>'+
+          '<div class="en"><div class="ename">'+(e.desc||'刷卡消費')+'</div><div class="emeta">'+ctag+'<span style="color:var(--textl)">'+fmtD(e.date)+'</span><span style="font-size:10px;color:var(--textl);margin-left:4px">久按編輯</span></div></div>'+
           '<div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:700;color:var(--navy)">-'+fmt(e.amount)+'</div><button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\');renderCardDetail()">✕</button></div>'+
         '</div>'+ib+'</div>';
       });
@@ -462,6 +463,13 @@ function renderCardDetail(){
   document.getElementById('mc').innerHTML=h;
   document.getElementById('mo').style.display='flex';
 }
+
+let _cardItemLpTimer=null;
+function cardItemLp(id){
+  cardItemLpEnd();
+  _cardItemLpTimer=setTimeout(()=>{_cardItemLpTimer=null;openEdit(id,false,true);},600);
+}
+function cardItemLpEnd(){if(_cardItemLpTimer){clearTimeout(_cardItemLpTimer);_cardItemLpTimer=null;}}
 
 // ─── CARD LONG PRESS ────────────────────────────────────────────────
 let _cardLpTimer=null,_accLpTimer=null,_lpFired=false;
@@ -576,7 +584,9 @@ function confirmDelAcc(id){
 let _editTimer=null;
 function editLp(id,isInc){editLpEnd();_editTimer=setTimeout(()=>{_editTimer=null;openEdit(id,isInc);},600);}
 function editLpEnd(){if(_editTimer){clearTimeout(_editTimer);_editTimer=null;}}
-function openEdit(id,isInc){
+let _returnToCard=false;
+function openEdit(id,isInc,returnToCard){
+  _returnToCard=!!returnToCard;
   const item=isInc?S.incomes.find(x=>x.id===id):S.expenses.find(x=>x.id===id);
   if(!item)return;
   AF.editingId=id;AF.type=isInc?'inc':'exp';AF._a=item.amount;AF._d=item.desc||'';
@@ -1266,7 +1276,9 @@ function subAdd(){
       if(AF.method==='刷卡'){if(AF.cardId)exp.cardId=AF.cardId;if(AF.inst){const p=parseInt(document.getElementById('mperd')?.value)||AF.periods;exp.inst={on:true,periods:p,monthly:Math.ceil(amt/p)};}}
       S.expenses.push(exp);}
   }
-  save();closeM();render();
+  save();
+  if(_returnToCard){_returnToCard=false;closeM();renderCardDetail();}
+  else{closeM();render();}
 }
 function subSettings(){const b=parseFloat(document.getElementById('mbudget')?.value);const p=parseFloat(document.getElementById('mpetty')?.value);if(b>0)S.budget=b;if(p>0)S.petty.budget=p;save();closeM();render();}
 function subCard(){const n=(document.getElementById('mcn')?.value||'').trim();if(!n)return;S.cards.push({id:uid(),name:n,last4:document.getElementById('mcl4')?.value||'????',billingCycle:document.getElementById('mcb')?.value||'?',statementDate:document.getElementById('mcs')?.value||'?',dueDate:document.getElementById('mcd')?.value||'?'});save();closeM();render();}
