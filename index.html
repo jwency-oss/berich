@@ -83,9 +83,8 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
 <div id="W" style="height:100dvh;overflow:hidden;position:relative;max-width:430px;margin:0 auto;background:var(--bg)">
   <div id="scroll" style="height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:86px">
     <div style="display:flex;flex-direction:column;align-items:center;padding:16px 16px 4px;position:relative">
-      <button onclick="showM('settings')" style="position:absolute;top:14px;right:14px;background:var(--maple-ll);border:none;width:32px;height:32px;border-radius:50%;color:var(--maple-d);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#9881;</button>
       <div style="display:flex;flex-direction:column;align-items:center">
-        <div style="position:relative;width:156px;height:156px">
+        <div onmousedown="budgetLp()" onmouseup="budgetLpEnd()" onmouseleave="budgetLpEnd()" ontouchstart="budgetLp();event.preventDefault()" ontouchend="budgetLpEnd()" ontouchmove="budgetLpEnd()" style="position:relative;width:156px;height:156px;cursor:pointer;user-select:none;-webkit-user-select:none">
           <svg style="position:absolute;inset:0" viewBox="0 0 162 162">
             <circle cx="81" cy="81" r="78" fill="white" stroke="var(--maple-ll)" stroke-width="1.5"/>
             <circle cx="81" cy="81" r="69" fill="none" stroke="#EDD0CC" stroke-width="9"/>
@@ -98,7 +97,7 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
           </div>
         </div>
         <div style="width:10px;background:linear-gradient(var(--maple),var(--maple-l));height:16px;border-radius:0 0 5px 5px;margin-top:-1px;z-index:1;position:relative"></div>
-        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(150deg,var(--plum-l),var(--plum));display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-1px;box-shadow:0 5px 15px rgba(122,108,154,.3)">
+        <div onmousedown="fundCircleLp()" onmouseup="fundCircleLpEnd()" onmouseleave="fundCircleLpEnd()" ontouchstart="fundCircleLp();event.preventDefault()" ontouchend="fundCircleLpEnd()" ontouchmove="fundCircleLpEnd()" style="width:76px;height:76px;border-radius:50%;background:linear-gradient(150deg,var(--plum-l),var(--plum));display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-1px;box-shadow:0 5px 15px rgba(122,108,154,.3);cursor:pointer;user-select:none;-webkit-user-select:none">
           <div id="fund-name-lbl" style="font-size:9px;color:rgba(255,255,255,.85);font-weight:700;letter-spacing:1px">私房錢</div>
           <div id="fund-disp" class="pnum" style="font-size:17px;color:#fff;letter-spacing:-.5px">$0</div>
         </div>
@@ -464,7 +463,76 @@ function renderCardDetail(){
   document.getElementById('mo').style.display='flex';
 }
 
-let _cardItemLpTimer=null;
+// ─── CIRCLE LONG PRESS ──────────────────────────────────────────────
+let _budgetLpT=null,_fundCircleLpT=null;
+
+function budgetLp(){
+  _budgetLpT=setTimeout(()=>{_budgetLpT=null;showBudgetEdit();},600);
+}
+function budgetLpEnd(){if(_budgetLpT){clearTimeout(_budgetLpT);_budgetLpT=null;}}
+
+function showBudgetEdit(){
+  const ov=document.createElement('div');ov.id='budget-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:20px;padding:22px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:6px">每日花費上限</div>'+
+    '<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:14px">目前：'+fmt(S.budget)+'</div>'+
+    '<input id="budget-inp" class="fi" type="number" inputmode="decimal" value="'+S.budget+'" style="text-align:center;font-size:20px;font-weight:700;color:var(--maple)">'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<button onclick="document.getElementById(\'budget-ov\').remove()" style="flex:1;padding:11px;background:var(--surf);border:none;border-radius:var(--r);font-size:14px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>'+
+      '<button onclick="saveBudget()" style="flex:1;padding:11px;background:var(--maple);border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff">儲存</button>'+
+    '</div></div>';
+  document.getElementById('W').appendChild(ov);
+  setTimeout(()=>{const i=document.getElementById('budget-inp');if(i){i.focus();i.select();}},80);
+}
+function saveBudget(){
+  const v=parseFloat(document.getElementById('budget-inp')?.value);
+  if(v>0){S.budget=v;save();render();}
+  document.getElementById('budget-ov')?.remove();
+}
+
+function fundCircleLp(){
+  _fundCircleLpT=setTimeout(()=>{_fundCircleLpT=null;showFundCircleEdit();},600);
+}
+function fundCircleLpEnd(){if(_fundCircleLpT){clearTimeout(_fundCircleLpT);_fundCircleLpT=null;}}
+
+function showFundCircleEdit(){
+  const name=S.tabNames.fund||'私房錢';
+  const ov=document.createElement('div');ov.id='fund-circle-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--card);border-radius:20px;padding:22px;width:100%;max-width:320px">'+
+    '<div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">'+name+'</div>'+
+    '<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:14px">目前餘額：'+fmt(S.fund.balance)+'</div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+      '<button id="fc-in-btn" onclick="setFcType(\'in\')" style="flex:1;padding:9px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">＋ 存入</button>'+
+      '<button id="fc-out-btn" onclick="setFcType(\'out\')" style="flex:1;padding:9px;background:var(--surf);color:var(--textm);border:.5px solid var(--bdr);border-radius:var(--r);font-size:13px;cursor:pointer;font-family:inherit">－ 取出</button>'+
+    '</div>'+
+    '<input id="fund-circle-inp" class="fi" type="number" inputmode="decimal" placeholder="金額" style="text-align:center;font-size:20px;font-weight:700;color:var(--plum)">'+
+    '<input id="fund-circle-note" class="fi" placeholder="備註（可略）" style="margin-top:8px">'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<button onclick="document.getElementById(\'fund-circle-ov\').remove()" style="flex:1;padding:11px;background:var(--surf);border:none;border-radius:var(--r);font-size:14px;cursor:pointer;font-family:inherit;color:var(--textm)">取消</button>'+
+      '<button onclick="saveFundCircle()" style="flex:1;padding:11px;background:var(--plum);border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff">確認</button>'+
+    '</div></div>';
+  document.getElementById('W').appendChild(ov);
+  setTimeout(()=>{const i=document.getElementById('fund-circle-inp');if(i)i.focus();},80);
+}
+let _fcType='in';
+function setFcType(t){
+  _fcType=t;
+  const inB=document.getElementById('fc-in-btn'),outB=document.getElementById('fc-out-btn');
+  if(inB)inB.style.cssText=inB.style.cssText.replace(/background:[^;]+/,'background:'+(t==='in'?'var(--green)':'var(--surf)'));
+  if(outB)outB.style.cssText=outB.style.cssText.replace(/background:[^;]+/,'background:'+(t==='out'?'var(--plum)':'var(--surf)'));
+  if(inB){inB.style.background=t==='in'?'var(--green)':'var(--surf)';inB.style.color=t==='in'?'#fff':'var(--textm)';}
+  if(outB){outB.style.background=t==='out'?'var(--plum)':'var(--surf)';outB.style.color=t==='out'?'#fff':'var(--textm)';}
+}
+function saveFundCircle(){
+  const a=parseFloat(document.getElementById('fund-circle-inp')?.value);if(!a||a<=0)return;
+  const desc=document.getElementById('fund-circle-note')?.value||'';
+  const t=_fcType;
+  if(t==='in'){S.fund.balance+=a;S.incomes.push({id:uid(),date:Date.now(),amount:a,desc,method:'私房錢',cat:'其他',isFund:true});}
+  else{S.fund.balance=Math.max(0,S.fund.balance-a);S.expenses.push({id:uid(),date:Date.now(),amount:a,desc,method:'私房錢',cat:'其他',isFund:true});}
+  save();render();document.getElementById('fund-circle-ov')?.remove();
+}
 function cardItemLp(id){
   cardItemLpEnd();
   _cardItemLpTimer=setTimeout(()=>{_cardItemLpTimer=null;openEdit(id,false,true);},600);
