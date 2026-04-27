@@ -768,13 +768,61 @@ function showChart(period){
       '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="font-size:10px;color:var(--textl);margin-bottom:1px">總支出</div><div class="pnum" style="font-size:20px;color:var(--maple-d);letter-spacing:-1px;line-height:1.1">'+fmt(tot)+'</div></div>'+
     '</div>'+
     (!items.length?'<div class="empty">這段時間沒有支出</div>':items.map(d=>{const pt=Math.round(d.a/tot*100);
-      return '<div class="chart-row"><div style="width:10px;height:10px;border-radius:50%;background:'+d.col+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text);font-weight:600">'+catIcon(d.c)+' '+d.c+'</span><span style="color:var(--textl)">'+fmt(d.a)+' · <b style="color:var(--textm)">'+pt+'%</b></span></div><div style="background:var(--surf);height:5px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+d.col+';width:'+pt+'%"></div></div></div></div>';
+      return '<div class="chart-row" onclick="showCatDetail(\''+d.c+'\',\''+chartPer+'\')" style="cursor:pointer;border-radius:var(--r);padding:4px 6px;margin:-4px -6px;transition:background .1s" onmouseover="this.style.background=\'var(--surf)\'" onmouseout="this.style.background=\'\'"><div style="width:10px;height:10px;border-radius:50%;background:'+d.col+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text);font-weight:600">'+catIcon(d.c)+' '+d.c+'</span><span style="color:var(--textl)">'+fmt(d.a)+' · <b style="color:var(--textm)">'+pt+'%</b> ›</span></div><div style="background:var(--surf);height:5px;border-radius:2px;overflow:hidden"><div style="height:100%;background:'+d.col+';width:'+pt+'%"></div></div></div></div>';
     }).join(''))+
     '<button class="ab" style="margin-top:10px" onclick="showCatMgmt()">管理分類</button>';
   document.getElementById('mo').style.display='flex';
 }
 
-// ─── CATEGORY MGMT ──────────────────────────────────────────────────
+// ─── CATEGORY DETAIL ────────────────────────────────────────────────
+function showCatDetail(cat, period){
+  const now=new Date();
+  let exps=S.expenses.filter(e=>personal(e)&&e.cat===cat);
+  if(period==='today')exps=exps.filter(e=>sameDay(e.date,viewDate));
+  else if(period==='week'){const mon=new Date(now);mon.setDate(now.getDate()-(now.getDay()||7)+1);mon.setHours(0,0,0,0);exps=exps.filter(e=>new Date(e.date)>=mon);}
+  else if(period==='month')exps=exps.filter(e=>{const d=new Date(e.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  else if(period==='year')exps=exps.filter(e=>new Date(e.date).getFullYear()===now.getFullYear());
+  exps.sort((a,b)=>b.date-a.date);
+  const tot=exps.reduce((s,e)=>s+e.amount,0);
+  const col=catCol(cat);
+  const PLBL={today:'今日',week:'本週',month:'本月',year:'本年',all:'全部'};
+
+  document.getElementById('mc').innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
+      '<button onclick="showChart(\''+period+'\')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:22px;padding:0 4px 0 0;line-height:1">&#8249;</button>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:17px;font-weight:700;color:var(--text)">'+catIcon(cat)+' '+cat+'</div>'+
+        '<div style="font-size:11px;color:var(--textl)">'+(PLBL[period]||'全部')+'共 '+exps.length+' 筆</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:18px;font-weight:700;color:'+col+'">'+fmt(tot)+'</div>'+
+        '<div style="font-size:10px;color:var(--textl)">總計</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="height:.5px;background:var(--bdr);margin-bottom:12px"></div>'+
+    (!exps.length?'<div class="empty">這段時間沒有 '+cat+' 的紀錄</div>':
+      exps.map(e=>{
+        const card=e.cardId?S.cards.find(c=>c.id===e.cardId):null;
+        const acc=e.accId?S.accounts.find(a=>a.id===e.accId):null;
+        const payCol=e.method==='刷卡'?'var(--navy)':e.method==='零用金'?'var(--bean)':'var(--yellow)';
+        const payBg=e.method==='刷卡'?'var(--navy-ll)':e.method==='零用金'?'var(--bean-ll)':'var(--yellow-ll)';
+        const payIco=e.method==='刷卡'?'💳':e.method==='零用金'?'🏢':'💵';
+        const cardtag=card?'<span class="tag" style="background:var(--navy-ll);color:var(--navy)">'+card.name+'</span>':'';
+        const acctag=acc?'<span class="tag" style="background:'+accCol(acc)+'20;color:'+accCol(acc)+'">'+accIcon(acc)+' '+acc.name+'</span>':'';
+        return '<div class="ei"><div class="eirow">'+
+          '<div class="eico" style="background:'+payBg+'">'+payIco+'</div>'+
+          '<div class="en">'+
+            '<div class="ename">'+(e.desc||'消費')+'</div>'+
+            '<div class="emeta">'+cardtag+acctag+'<span style="color:var(--textl)">'+fmtD(e.date)+' '+fmtT(e.date)+'</span></div>'+
+          '</div>'+
+          '<div style="text-align:right;flex-shrink:0">'+
+            '<div style="font-size:15px;font-weight:700;color:'+col+'">-'+fmt(e.amount)+'</div>'+
+            '<button class="db" onclick="event.stopPropagation();delExp(\''+e.id+'\')">✕</button>'+
+          '</div>'+
+        '</div></div>';
+      }).join('')
+    );
+}
 function showCatMgmt(){
   const mc=document.getElementById('mc');
   mc.innerHTML=
