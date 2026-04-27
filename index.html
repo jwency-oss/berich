@@ -1084,7 +1084,10 @@ function showM(type){
   if(type==='add'){
     AF.editingId=null;
     AF.type='exp';AF.cat=allCats()[0]||CAT_DEF[0];AF.incCat=S.incomeCategories[0]||'薪資';
-    AF.method='現金';AF.cardId=null;AF.accId=null;AF.inst=false;AF.periods=3;AF._a='';AF._d='';AF.date=todayStr();
+    AF.method='現金';AF.cardId=null;AF.accId=null;AF.inst=false;AF.periods=3;AF._a='';AF._d='';
+    // 連動主畫面的日期，不是永遠今天
+    const vd=viewDate;
+    AF.date=vd.getFullYear()+'-'+String(vd.getMonth()+1).padStart(2,'0')+'-'+String(vd.getDate()).padStart(2,'0');
     renderAddModal();
   }else if(type==='chart'){showChart('month');return;}
   else if(type==='catMgmt'){showCatMgmt();return;}
