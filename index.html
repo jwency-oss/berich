@@ -83,6 +83,10 @@ body{background:var(--bg);color:var(--textm);font-family:-apple-system,'PingFang
 <div id="W" style="height:100dvh;overflow:hidden;position:relative;max-width:430px;margin:0 auto;background:var(--bg)">
   <div id="scroll" style="height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:86px">
     <div style="display:flex;flex-direction:column;align-items:center;padding:16px 16px 4px;position:relative">
+      <div id="user-badge" style="position:absolute;top:14px;left:14px;background:var(--maple-ll);border-radius:20px;padding:4px 10px 4px 8px;display:flex;align-items:center;gap:5px;cursor:pointer" onclick="showUserSwitch()">
+        <span style="font-size:13px">👤</span>
+        <span id="user-badge-name" style="font-size:11px;font-weight:700;color:var(--maple-d)">BeRich</span>
+      </div>
       <div style="display:flex;flex-direction:column;align-items:center">
         <div onmousedown="budgetLp()" onmouseup="budgetLpEnd()" onmouseleave="budgetLpEnd()" ontouchstart="budgetLp();event.preventDefault()" ontouchend="budgetLpEnd()" ontouchmove="budgetLpEnd()" style="position:relative;width:156px;height:156px;cursor:pointer;user-select:none;-webkit-user-select:none">
           <svg style="position:absolute;inset:0" viewBox="0 0 162 162">
@@ -392,6 +396,8 @@ function updateTabLabels(){
   const tp=document.getElementById('tab-petty');if(tp)tp.textContent=S.tabNames.petty||'零用金';
   const tf=document.getElementById('tab-fund');if(tf)tf.textContent=S.tabNames.fund||'私房錢';
   const fl=document.getElementById('fund-name-lbl');if(fl)fl.textContent=S.tabNames.fund||'私房錢';
+  const ub=document.getElementById('user-badge-name');
+  if(ub)ub.textContent=(_curUser?_curUser+' ':'')+'BeRich';
 }
 let _rdTimer=null,_rdInterval=null;
 function rdStart(n){
