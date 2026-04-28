@@ -196,9 +196,89 @@ const totalAssets=()=>S.accounts.reduce((s,a)=>s+accBal(a.id),0);
 const accIcon=a=>ACC_ICONS[a.type]||'💰';
 const accCol=a=>ACC_COLS[a.type]||'#9A9298';
 
+// ─── MULTI-USER ──────────────────────────────────────────────────────
+// 每個使用者有獨立的 storage key，互不干擾
+let _curUser = localStorage.getItem('Berich_ActiveUser') || '';
+
+function storageKey(){ return 'Berich_V10_' + (_curUser||'default'); }
+
+function initUser(){
+  if(_curUser){ load(); return; }
+  // 第一次使用，請設定名稱
+  showUserSetup(false);
+}
+
+function showUserSetup(canCancel){
+  const users = getUserList();
+  const ov=document.createElement('div');ov.id='user-setup-ov';
+  ov.style.cssText='position:absolute;inset:0;background:rgba(30,22,20,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px';
+  ov.innerHTML=
+    '<div style="background:var(--card);border-radius:22px;padding:24px 20px;width:100%;max-width:340px">'+
+      '<div style="text-align:center;margin-bottom:18px">'+
+        '<div style="font-size:28px;margin-bottom:6px">👤</div>'+
+        '<div style="font-size:17px;font-weight:700;color:var(--text)">選擇使用者</div>'+
+        '<div style="font-size:12px;color:var(--textl);margin-top:4px">每個人的資料各自獨立</div>'+
+      '</div>'+
+      (users.length?
+        '<div style="margin-bottom:14px">'+
+          '<div style="font-size:11px;color:var(--textl);font-weight:700;margin-bottom:8px">已有的使用者</div>'+
+          users.map(u=>'<button onclick="switchUser(\''+u+'\')" style="width:100%;padding:11px 14px;background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--r);font-size:14px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;text-align:left;margin-bottom:7px;display:flex;align-items:center;gap:10px">'+
+            '<span style="font-size:18px">👤</span><span style="flex:1">'+u+'</span><span style="font-size:12px;color:var(--textl)">›</span>'+
+          '</button>').join('')+
+        '</div>':'<div style="margin-bottom:14px"></div>')+
+      '<div style="height:.5px;background:var(--bdr);margin-bottom:14px"></div>'+
+      '<div style="font-size:11px;color:var(--textl);font-weight:700;margin-bottom:8px">新增使用者</div>'+
+      '<input id="new-user-inp" class="fi" placeholder="輸入你的名字..." style="margin-bottom:10px">'+
+      '<button onclick="createUser()" style="width:100%;padding:12px;background:var(--maple);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">建立並進入</button>'+
+      (canCancel?'<button onclick="document.getElementById(\'user-setup-ov\').remove()" style="width:100%;padding:10px;background:none;border:none;font-size:13px;color:var(--textl);cursor:pointer;font-family:inherit;margin-top:6px">取消</button>':'')+
+    '</div>';
+  document.getElementById('W').appendChild(ov);
+  setTimeout(()=>{const i=document.getElementById('new-user-inp');if(i)i.focus();},120);
+}
+
+function getUserList(){
+  const list=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('Berich_V10_'))list.push(k.replace('Berich_V10_',''));
+  }
+  return list.filter(u=>u&&u!=='default').sort();
+}
+
+function createUser(){
+  const name=(document.getElementById('new-user-inp')?.value||'').trim();
+  if(!name){alert('請輸入名字');return;}
+  switchUser(name);
+}
+
+function switchUser(name){
+  _curUser=name;
+  localStorage.setItem('Berich_ActiveUser',name);
+  document.getElementById('user-setup-ov')?.remove();
+  // 重置狀態，載入新使用者資料
+  S={budget:1000,expenses:[],incomes:[],transfers:[],cards:[],recurring:[],
+    accounts:[{id:'acc-cash',name:'現金',type:'現金',initBal:0}],
+    petty:{budget:5000},fund:{balance:0},tabNames:{petty:'零用金',fund:'私房錢'},
+    categories:[...CAT_DEF],customCats:[],
+    incomeCategories:['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手']};
+  load();
+  // 顯示歡迎
+  setTimeout(()=>{
+    const wb=document.createElement('div');wb.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:300;white-space:nowrap;pointer-events:none;opacity:1;transition:opacity .5s';
+    wb.textContent='👋 歡迎，'+name+'！';
+    document.getElementById('W').appendChild(wb);
+    setTimeout(()=>{wb.style.opacity='0';setTimeout(()=>wb.remove(),500);},2000);
+  },300);
+}
+
+function showUserSwitch(){
+  document.getElementById('user-setup-ov')?.remove();
+  showUserSetup(true);
+}
+
 // ─── STORAGE ────────────────────────────────────────────────────────
 function load(){
-  try{const d=localStorage.getItem('Berich_V10');if(d)Object.assign(S,JSON.parse(d));
+  try{const d=localStorage.getItem(storageKey());if(d)Object.assign(S,JSON.parse(d));
     if(!S.categories)S.categories=[...CAT_DEF];if(!S.customCats)S.customCats=[];
     if(!S.incomeCategories)S.incomeCategories=['薪資','外快','獎金','紅包','利息股利','報帳回饋','網拍二手'];
     if(!S.petty)S.petty={budget:5000};if(!S.fund)S.fund={balance:0};
@@ -212,8 +292,8 @@ function load(){
   checkRecurring();render();
   initPWAIcon();
 }
-const save=()=>{try{localStorage.setItem('Berich_V10',JSON.stringify(S));}catch(e){}};
-function clearAllData(){if(confirm('確定要清空所有資料嗎？\n此動作無法復原！')){localStorage.removeItem('Berich_V10');location.reload();}}
+const save=()=>{try{localStorage.setItem(storageKey(),JSON.stringify(S));}catch(e){}};
+function clearAllData(){if(confirm('確定要清空所有資料嗎？\n此動作無法復原！')){localStorage.removeItem(storageKey());location.reload();}}
 // ─── RECURRING CHECK ────────────────────────────────────────────────
 function checkRecurring(){
   const dd=new Date().getDate(),ds=todayStr();
@@ -1220,6 +1300,11 @@ function showM(type){
   else if(type==='recurring'){showRecurring();return;}
   else if(type==='settings'){
     mc.innerHTML='<div class="mtitle">設定</div>'+
+      '<div style="background:var(--maple-ll);border-radius:var(--r);padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+        '<span style="font-size:20px">👤</span>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--maple-d)">'+(_curUser||'預設使用者')+'</div><div style="font-size:11px;color:var(--maple-l)">目前使用者</div></div>'+
+        '<button onclick="showUserSwitch()" style="background:var(--maple);color:#fff;border:none;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">切換</button>'+
+      '</div>'+
       '<div style="background:var(--card);border-radius:var(--r);border:.5px solid var(--bdr);overflow:hidden;margin-bottom:14px">'+
         '<div class="srow"><span style="font-size:13px;font-weight:600;color:var(--text)">每日花費上限</span><div style="display:flex;align-items:center;gap:6px"><input id="mbudget" type="number" value="'+S.budget+'" style="width:88px;padding:5px 8px;border:1px solid var(--bdr);border-radius:8px;background:var(--surf);color:var(--text);font-size:13px;text-align:right;outline:none" inputmode="decimal"><span style="color:var(--textl);font-size:13px">元</span></div></div>'+
         '<div class="srow"><span style="font-size:13px;font-weight:600;color:var(--text)">零用金月度額度</span><div style="display:flex;align-items:center;gap:6px"><input id="mpetty" type="number" value="'+(S.petty.budget||5000)+'" style="width:88px;padding:5px 8px;border:1px solid var(--bdr);border-radius:8px;background:var(--surf);color:var(--text);font-size:13px;text-align:right;outline:none" inputmode="decimal"><span style="color:var(--textl);font-size:13px">元</span></div></div>'+
@@ -1418,7 +1503,7 @@ function initPWAIcon(){
   document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
 }
 
-load();
+initUser();
 </script>
 </body>
 </html>
